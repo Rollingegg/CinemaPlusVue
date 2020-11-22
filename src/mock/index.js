@@ -1,8 +1,10 @@
 import Mock from 'mockjs'
 import movie from './movie'
+import user from './user'
 
 const mocks = [
-  ...movie
+  ...movie,
+  ...user
 ]
 
 export default function mockXHR () {

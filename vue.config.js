@@ -44,7 +44,21 @@ module.exports = {
       }
     }
   },
-
+  // vue.config.js for less-loader@6.0.0
+  css: {
+    loaderOptions: {
+      less: {
+        lessOptions: {
+          modifyVars: {
+            'primary-color': '#0063B1',
+            'link-color': '#0063B1',
+            'border-radius-base': '10px'
+          },
+          javascriptEnabled: true
+        }
+      }
+    }
+  },
   configureWebpack: {
     name: name,
     resolve: {

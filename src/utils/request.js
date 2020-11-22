@@ -68,7 +68,7 @@ function param2urlencoded (url, params) {
       }
     }
   }
-  return `${url}${_params}`
+  return `${url}${_params.substr(0, _params.length - 1)}`
 }
 
 const request = {
