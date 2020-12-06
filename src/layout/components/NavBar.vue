@@ -8,7 +8,7 @@
     </div>
 
     <div class="search-container">
-      <a-input-search class="search" placeholder="寻找中意影片" size="large" enter-button @search="onSearch"/>
+      <a-input-search class="search" placeholder="寻找中意影片" size="large" @search="onSearch"/>
     </div>
 
     <div class="menu" role="navigation">
@@ -100,7 +100,7 @@ export default {
     transition: background .3s;
 
     &:hover {
-      background: rgba(0, 0, 0, .025)
+      background: @hover-background-color
     }
   }
 

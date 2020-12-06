@@ -11,6 +11,15 @@
         </transition>
       </div>
     </main>
+
+    <footer class="app-footer">
+      <div class="copyright">
+        Copyright
+        <a-icon type="copyright"/>
+        <span v-html="copyright"></span>
+        All Rights Reserved
+      </div>
+    </footer>
   </section>
 </template>
 
@@ -24,6 +33,9 @@ export default {
   computed: {
     isMobile () {
       return this.$store.state.device === 'mobile'
+    },
+    copyright () {
+      return this.$store.state.copyright
     }
   },
   components: {
@@ -40,6 +52,14 @@ export default {
   right: 0;
   z-index: 9;
   width: 100%;
+}
+.app-footer{
+  padding: @base-interval;
+  text-align: center;
+  background-color: @footer-background-color;
+  .copyright{
+    color: rgba(0,0,0,.45);
+  }
 }
 .app-main {
   /* 60= navbar  60  */

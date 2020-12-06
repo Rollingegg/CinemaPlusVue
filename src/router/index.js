@@ -34,6 +34,24 @@ const routes = [
         component: () => import('@/views/Home')
       },
       {
+        path: '/movies',
+        name: 'movies',
+        meta: {
+          title: '电影列表'
+        },
+        component: () => import('@/views/movie/MovieList'),
+        props: (route) => ({
+          query: route.query.q,
+          limit: route.query.limit,
+          type: route.query.type
+        })
+      },
+      {
+        path: '/movies/:id(\\d+)',
+        component: () => import('@/views/movie/MovieDetail'),
+        name: 'movieDetail'
+      },
+      {
         path: '/about',
         name: 'About',
         // route level code-splitting
