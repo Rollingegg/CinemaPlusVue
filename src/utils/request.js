@@ -2,6 +2,7 @@ import axios from 'axios'
 import { notification, message } from 'ant-design-vue'
 
 const BACKEND_REQUEST = axios.create({
+  // 如果url不是绝对路径，那么会在前面加上baseURL
   baseURL: process.env.VUE_APP_MOCK === 'true' ? '' : process.env.VUE_APP_BASE_API,
   timeout: 5000,
   validateStatus (status) {
@@ -56,6 +57,18 @@ BACKEND_REQUEST.interceptors.response.use(
   err
 )
 
+/**
+ * 拼接query到url后
+ * 对于数组入参如ids=[1,2]
+ * axios原生get的做法是转换为?ids[]=1&ids[]=2(@RequestParam需指定名称为"ids[]")
+ * 因而可以转换为?ids=1,2
+ * 或者转化为?ids=1&ids=1(Swagger的做法)
+ * SpringBoot均可识别为list数组
+ * 这里使用第一种
+ * @param url 请求url
+ * @param params 查询参数
+ * @returns {string}
+ */
 function param2urlencoded (url, params) {
   let _params
   if (Object.is(params, undefined)) {

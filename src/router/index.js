@@ -52,6 +52,26 @@ const routes = [
         name: 'movieDetail'
       },
       {
+        path: 'movies/buy',
+        component: () => import('@/views/movie/MovieBuy'),
+        name: 'movieBuy'
+      },
+      {
+        path: 'user/ticket',
+        component: () => import('@/views/user/TicketList'),
+        name: 'userTicket'
+      },
+      {
+        path: 'user/consumption',
+        component: () => import('@/views/user/ConsumptionRecord'),
+        name: 'userConsumption'
+      },
+      {
+        path: 'user/card',
+        component: () => import('@/views/user/CardPack'),
+        name: 'userCardPack'
+      },
+      {
         path: '/about',
         name: 'About',
         // route level code-splitting

@@ -1,5 +1,5 @@
 import Mock from 'mockjs'
-import getQuery from '@/mock/utils'
+import { getQuery } from '@/mock/utils'
 
 const Random = Mock.Random
 

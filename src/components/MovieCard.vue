@@ -26,9 +26,9 @@
       <div class="movie-card-info-item">主演：<span>{{ movieInfo.actors }}</span></div>
       <div class="movie-card-info-item">上映日期：<span>{{ movieInfo.date }}</span></div>
     </div>
-    <div class="movie-card-button">
+    <div class="movie-card-button" v-if="!isDownStairs">
       <router-link :to="`/movies/${movieInfo.id}`">
-        <a-button :type="isPlaying?'danger':'primary'" :size="isMobile?'default':'large'" :disabled="isDownStairs">
+        <a-button :type="isPlaying?'danger':'primary'" :size="isMobile?'default':'large'">
           {{isPlaying?'购票':'预售'}}
         </a-button>
       </router-link>
