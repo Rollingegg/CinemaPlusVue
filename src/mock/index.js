@@ -9,6 +9,9 @@ const mocks = [
 ]
 
 export function mockXHR () {
+  Mock.setup({
+    timeout: '500-3000'
+  })
   function XHR2ExpressReqWrap (respond) {
     return function (options) {
       let result = null

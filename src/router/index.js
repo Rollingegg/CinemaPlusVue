@@ -49,7 +49,8 @@ const routes = [
       {
         path: '/movies/:id(\\d+)',
         component: () => import('@/views/movie/MovieDetail'),
-        name: 'movieDetail'
+        name: 'movieDetail',
+        props: (route) => ({ id: Number(route.params.id) })
       },
       {
         path: 'movies/buy',

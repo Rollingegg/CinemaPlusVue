@@ -28,8 +28,10 @@
     </div>
     <div class="movie-card-button" v-if="!isDownStairs">
       <router-link :to="`/movies/${movieInfo.id}`">
-        <a-button :type="isPlaying?'danger':'primary'" :size="isMobile?'default':'large'">
-          {{isPlaying?'购票':'预售'}}
+        <a-button shape="round"
+                  :type="isPlaying?'danger':'primary'"
+                  :size="isMobile?'default':'large'">
+          {{ isPlaying ? '购票':'预售' }}
         </a-button>
       </router-link>
     </div>
@@ -73,7 +75,7 @@ export default {
 </script>
 
 <style scoped lang="less">
-@import "~@/assets/style/variables.less";
+@import "~@/assets/style/variables";
 @import "~@/assets/style/utils";
 
 .movie-card {

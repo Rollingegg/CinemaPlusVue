@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <a-spin class="home" :spinning="loading" size="large">
     <a-row :gutter="32">
       <a-col :md="18">
         <section class="movies-overview-container">
@@ -25,7 +25,7 @@
           <div class="movies-overview-container-title">
             <div class="section-title">今日票房</div>
           </div>
-          <a-list :data-source="rankList.slice(1)" class="movies-rank-container">
+          <a-list v-if="!loading" :data-source="rankList.slice(1)" class="movies-rank-container">
             <router-link :to="`/movies/${rankList[0].id}`" slot="header" class="rank-first">
               <img :src="rankList[0].url" alt="movie-poster" class="rank-first-movie"/>
               <div class="rank-first-info">
@@ -45,7 +45,7 @@
         </section>
       </a-col>
     </a-row>
-  </div>
+  </a-spin>
 </template>
 
 <script>

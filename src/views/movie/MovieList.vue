@@ -1,11 +1,13 @@
 <template>
   <section class="movie-list-container">
     <div class="section-title">选择心上影片({{ movieList.length }})</div>
-    <ul>
-      <li v-for="(item,index) in movieList.slice((current-1)*pageSize,current*pageSize)" :key="index">
-        <movie-card :movie-info="item"/>
-      </li>
-    </ul>
+    <a-skeleton :loading="loading" active>
+      <ul>
+        <li v-for="(item,index) in movieList.slice((current-1)*pageSize,current*pageSize)" :key="index">
+          <movie-card :movie-info="item"/>
+        </li>
+      </ul>
+    </a-skeleton>
     <div class="pagination-container">
       <a-pagination v-model="current" hideOnsinglePage :pageSize="pageSize" :total="movieList.length"/>
     </div>
@@ -26,7 +28,8 @@ export default {
     return {
       movieList: [],
       current: 1,
-      pageSize: 10
+      pageSize: 10,
+      loading: true
     }
   },
   props: {
@@ -44,21 +47,35 @@ export default {
     MovieCard
   },
   async mounted () {
-    const query = {
-      query: this.query,
-      limit: this.limit,
-      type: this.type
+    await this.fetchAllMovies()
+  },
+  methods: {
+    async fetchAllMovies () {
+      const query = {
+        query: this.query,
+        limit: this.limit,
+        type: this.type
+      }
+      if (isEmpty(query.limit)) {
+        Reflect.deleteProperty(query, 'limit')
+      }
+      if (isEmpty(query.type)) {
+        Reflect.deleteProperty(query, 'type')
+      }
+      if (isEmpty(query.query)) {
+        Reflect.deleteProperty(query, 'query')
+      }
+      this.loading = true
+      try {
+        this.movieList = await fetchMovies(query)
+        if (this.movieList === null || this.movieList.length === 0) {
+          this.$message.error('获取电影列表失败，请检查网络连接')
+        }
+      } catch (e) {
+      } finally {
+        this.loading = false
+      }
     }
-    if (isEmpty(query.limit)) {
-      Reflect.deleteProperty(query, 'limit')
-    }
-    if (isEmpty(query.type)) {
-      Reflect.deleteProperty(query, 'type')
-    }
-    if (isEmpty(query.query)) {
-      Reflect.deleteProperty(query, 'query')
-    }
-    this.movieList = await fetchMovies(query)
   }
 }
 </script>
@@ -89,7 +106,7 @@ export default {
     }
   }
 
-  .pagination-container{
+  .pagination-container {
     display: flex;
     justify-content: center;
   }
