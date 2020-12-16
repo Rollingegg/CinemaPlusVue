@@ -12,20 +12,14 @@
       </div>
     </main>
 
-    <footer class="app-footer">
-      <div class="copyright">
-        Copyright
-        <a-icon type="copyright"/>
-        <span v-html="copyright"></span>
-        All Rights Reserved
-      </div>
-    </footer>
+    <foot-bar :copyright="copyright"/>
   </section>
 </template>
 
 <script>
 import NavBar from '@/layout/components/NavBar'
 import ResizeMixin from './mixin/ResizeHandler'
+import FootBar from '@/layout/components/FootBar'
 
 export default {
   name: 'Layout',
@@ -39,6 +33,7 @@ export default {
     }
   },
   components: {
+    FootBar,
     NavBar
   }
 }
@@ -52,14 +47,6 @@ export default {
   right: 0;
   z-index: 9;
   width: 100%;
-}
-.app-footer{
-  padding: @base-interval;
-  text-align: center;
-  background-color: @footer-background-color;
-  .copyright{
-    color: rgba(0,0,0,.45);
-  }
 }
 .app-main {
   /* 60= navbar  60  */

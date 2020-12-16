@@ -20,6 +20,12 @@ const routes = [
     ]
   },
   {
+    path: '/login',
+    name: '登录页',
+    component: () => import('@/views/login/index'),
+    hidden: true
+  },
+  {
     path: '/',
     name: 'layout',
     redirect: '/home',

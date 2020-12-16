@@ -32,12 +32,13 @@
             <router-link to="/user/consumption">历史记录</router-link>
           </a-menu-item>
           <a-menu-divider/>
-          <a-menu-item @click.native="logout">
+<!--          //TODO 搞清楚@click.native在此处为何会重复调用logout函数-->
+          <a-menu-item @click="logout">
             <span style="display: block">退出登录</span>
           </a-menu-item>
         </a-menu>
         <a-menu slot="overlay" v-else>
-          <a-menu-item @click.native="login">
+          <a-menu-item @click="login">
             <span style="display: block">登录/注册</span>
           </a-menu-item>
         </a-menu>
@@ -67,18 +68,21 @@ export default {
     }
   },
   mounted () {
-    // console.log(this.avatar)
+    console.log(this.userName)
   },
   methods: {
     onSearch () {
       console.log('search')
     },
     async logout () {
+      this.$message.success('成功退出')
+      this.login()
       await this.$store.dispatch('user/logout')
-      await this.login()
     },
-    async login () {
-      await this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+    login () {
+      this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+      // window.location.reload()固然会清空state数据，但用户体验不好，故舍弃
+      // location.reload()
     }
   }
 }
