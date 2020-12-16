@@ -29,7 +29,7 @@
             <router-link to="/user/coupons">我的卡包</router-link>
           </a-menu-item>
           <a-menu-item>
-            <router-link to="/user/history">历史记录</router-link>
+            <router-link to="/user/consumption">历史记录</router-link>
           </a-menu-item>
           <a-menu-divider/>
           <a-menu-item @click.native="logout">

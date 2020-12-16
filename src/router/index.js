@@ -55,10 +55,16 @@ const routes = [
       {
         path: 'movies/buy',
         component: () => import('@/views/movie/MovieBuy'),
-        name: 'movieBuy'
+        name: 'movieBuy',
+        meta: {
+          title: '影票支付'
+        },
+        props: (route) => ({
+          movieId: Number(route.query.id)
+        })
       },
       {
-        path: 'user/ticket',
+        path: 'user/tickets',
         component: () => import('@/views/user/TicketList'),
         name: 'userTicket'
       },
@@ -68,7 +74,7 @@ const routes = [
         name: 'userConsumption'
       },
       {
-        path: 'user/card',
+        path: 'user/coupons',
         component: () => import('@/views/user/CardPack'),
         name: 'userCardPack'
       },
