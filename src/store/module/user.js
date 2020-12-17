@@ -5,9 +5,9 @@ const defaultAvatarUrl = 'https://p0.meituan.net/movie/7dd82a16316ab32c8359debdb
 const user = {
   namespaced: true,
   state: {
-    name: db.get('USER_NAME'),
-    avatar: defaultAvatarUrl,
-    id: db.get('USER_ID'),
+    name: db.get('USER_NAME', null),
+    avatar: db.get('USER_AVATAR', defaultAvatarUrl),
+    id: db.get('USER_ID', null),
     coupons: [],
     memberCardInfo: {},
     consumptionHistory: {}
@@ -18,6 +18,7 @@ const user = {
       state.name = name
     },
     set_avatar: (state, avatar) => {
+      db.save('USER_AVATAR', avatar)
       state.avatar = avatar
     },
     set_id: (state, id) => {

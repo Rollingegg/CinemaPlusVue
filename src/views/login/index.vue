@@ -14,20 +14,20 @@
 </template>
 
 <script>
-import Login from './components/Login'
-import Register from './components/Register'
+import SignIn from './components/Login'
+import SignUp from './components/Register'
 import FootBar from '@/layout/components/FootBar'
 
 export default {
   name: 'Login',
   components: {
     FootBar,
-    Login,
-    Register
+    SignIn,
+    SignUp
   },
   data () {
     return {
-      componentName: 'Login'
+      componentName: 'SignIn'
     }
   },
   computed: {

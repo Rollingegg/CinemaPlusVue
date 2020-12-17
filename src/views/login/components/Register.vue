@@ -209,7 +209,7 @@ export default {
     //   )
     // },
     returnLogin () {
-      this.$emit('register', 'Login')
+      this.$emit('register', 'SignIn')
     }
   }
 }

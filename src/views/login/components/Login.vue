@@ -127,7 +127,7 @@ export default {
       }
     },
     register () {
-      this.$emit('register', 'Register')
+      this.$emit('register', 'SignUp')
     },
     getCaptcha () {
       this.$message.warning('暂未开发')
