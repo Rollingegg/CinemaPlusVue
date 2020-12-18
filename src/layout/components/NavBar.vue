@@ -71,8 +71,14 @@ export default {
     console.log(this.userName)
   },
   methods: {
-    onSearch () {
-      console.log('search')
+    onSearch (val) {
+      console.log(val)
+      this.$router.push({
+        name: 'movies',
+        query: {
+          q: val
+        }
+      })
     },
     async logout () {
       this.$message.success('成功退出')

@@ -71,7 +71,8 @@ const routes = [
           title: '影票支付'
         },
         props: (route) => ({
-          movieId: Number(route.query.id)
+          movieId: Number(route.query.id),
+          movieTitle: route.params.title
         })
       },
       {

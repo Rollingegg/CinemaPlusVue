@@ -27,6 +27,7 @@
           </div>
           <a-list v-if="!loading" :data-source="rankList.slice(1)" class="movies-rank-container">
             <router-link :to="`/movies/${rankList[0].id}`" slot="header" class="rank-first">
+              <i class="rank-first-icon"></i>
               <img :src="rankList[0].url" alt="movie-poster" class="rank-first-movie"/>
               <div class="rank-first-info">
                 <h3>{{ rankList[0].title }}</h3>
@@ -72,13 +73,17 @@ export default {
   },
   async mounted () {
     this.loading = true
-    this.moviesCurrent = await fetchMovies({
-      type: 0,
-      limit: this.limit
-    })
-    this.rankList = await fetchMovieRank({
-      limit: 5
-    })
+    // 多个promise并行请求：使用Promise.all并行请求
+    const [moviesCurrent, rankList] = await Promise.all(
+      [fetchMovies({
+        type: 0,
+        limit: this.limit
+      }),
+      fetchMovieRank({
+        limit: 5
+      })])
+    this.moviesCurrent = moviesCurrent
+    this.rankList = rankList
     this.loading = false
   },
   methods: {
@@ -180,6 +185,17 @@ export default {
         margin: 8px 0 -12px 0;
         &:hover{
           background-color: @hover-background-color;
+        }
+        &-icon{
+          display: inline-block;
+          position: absolute;
+          left: 0;
+          // 对齐上部
+          top: @base-interval;
+          width: 22px;
+          height: 25px;
+          background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAaCAYAAACzdqxAAAAABmJLR0QA/wD/AP+gvaeTAAAC4ElEQVRIx92VTYscVRSGn1P39qS6E7vbEZ1ROjMxaTMoImHETIQoRHAjbrIw4HYWwa2/wJ+QVUAkiDshwiyMDEgkYVT8jE0WYcJAhCQ9JKOmp6e/UlXdde/JotXY89GtkSz0QEFRdc9zTr3vPXWl/toR5SFE8DCg/02w3fxAvUeNQa0FZES6ImmKOIcEwc5g9R7dd4DsW29jpqaRbHY4NopwN28QffIxXP95AH7/ThUNQ3LzJ8E5kqWL2NIUmQPPbHvZ0hTJ0kVwjtz8STQMQXUbMECYw0xMEp9bwK/dAhkihQh+7RbxuQXMxCSEuSHmpT200yGYfApNEvB+Z7D3aJL013Y6kPZ2AIsg7RbJ0gXC4ycw+8tor7uzvr0uZn+Z8PgJkqULSLs18IUD5okIvcVP0W5CZvYwrlolODgDdtPmSVNctYotHyQ5v0j6xecEm2STLSOtincOtRmkUCQ7/w7ZN96EPxz3nmjxM6IP30cbG0jaIzBmix9bB0SEwFoMSlC/Q3TmNEnl0p+vk8olojOnCep3+mus3dbk4ZMXGKReI144i8YxGsfEC2eReg0CMzTVMiLEWNzKMn69BoBbWSYwI9NGg/Eebbdwa7f7FrRb/W1o/kXHCuj009jyDEGh2E84egx3bQVZvTn0TzK8YxEkl0OjDp2PPugXcw7J5fqGqT4YWFTRq1dQ1fsM+b3gCJ3/lnkPEv+DE+SvoeBT1Wbi9EbTpZcB8sYe2mVk2orkZUhjW8BONeqq/tJx/sp6r1dZjbs//NRsL39db/4KcPTR/BMv5vc8VwrHDo9nMrO7TfD8mMiEERk4bqR2bC5JlUbk/bVGmlZ+66Y/Xu3cvVxptqvnaxsbpXCX/26jOVD8SDHPapwErz9WLM7m9+x9dnfu0ONj9qWCtbPZIChboSDfzL3wXjXufv9to7Xy1Xrz9qvjhfjU9dV/pOe7+0p8ud4IXxnPP/ly4ZGZveHY3D3KzjdbTNAgKwAAAABJRU5ErkJggg==) no-repeat;
+          background-size: contain;
         }
         &-movie{
           height: 100%;

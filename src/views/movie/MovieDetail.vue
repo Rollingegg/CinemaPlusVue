@@ -12,9 +12,10 @@
         <h1>{{ movieInfo.title }}</h1>
         <ul>
           <li>上映日期：<span>{{ movieInfo.date }}</span></li>
+          <li>时长：<span>{{ movieInfo.len }}分钟</span></li>
           <li>类型：<span>{{ movieInfo.category }}</span></li>
           <li>地区：<span>{{ movieInfo.date }}</span></li>
-          <li>语言：<span>{{ movieInfo.date }}</span></li>
+          <li>语言：<span>{{ movieInfo.lang }}</span></li>
           <li>导演：<span>{{ movieInfo.directors }}</span></li>
           <li>主演：<span>{{ movieInfo.actors }}</span></li>
         </ul>
@@ -49,7 +50,6 @@
 
 <script>
 import pageTitle from '@/directive/page-title'
-import request from '@/utils/request'
 import { fetchMovies } from '@/api/movie'
 
 const scheduleColumns = [
@@ -108,8 +108,6 @@ export default {
     pageTitle
   },
   async mounted () {
-    const movies = await request.get('http://localhost:4000/movie/all')
-    console.log(movies)
     console.log(this.id)
     this.movieInfo = await fetchMovies()
     this.movieInfo = this.movieInfo[0]
@@ -118,7 +116,8 @@ export default {
     buyMovie () {
       this.$router.push({
         name: 'movieBuy',
-        query: { id: this.id }
+        query: { id: this.id },
+        params: { title: this.movieInfo.title || '' }
       })
     }
   }
@@ -164,6 +163,7 @@ export default {
 
         @media (max-width: @mobile-screen-width) {
           font-size: @base-font-size;
+          width: 200px;
         }
 
         span {

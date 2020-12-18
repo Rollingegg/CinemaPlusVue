@@ -13,7 +13,11 @@ const movieUrlList = [
   'http://img.pianbar.com/Image/201604/p480747492.jpg',
   'https://pic2.zhimg.com/v2-38900351212beb39cd0334ef68692950_qhd.jpg',
   'http://i.gtimg.cn/qqlive/img/jpgcache/files/qqvideo/2/2ncsslue6kp57xs.jpg',
-  'http://image13.m1905.cn/uploadfile/2019/0218/20190218014612118309.jpg'
+  'http://image13.m1905.cn/uploadfile/2019/0218/20190218014612118309.jpg',
+  'https://p1.meituan.net/moviemachine/56d4089f70bce77395597e0b5b6ff3a12891795.jpg',
+  'https://p1.meituan.net/movie/f9f90625d902e3bfb75688037a2476f83410480.jpg',
+  'https://p1.meituan.net/moviemachine/6fb1855f663f9856bfc47b7d013e0474651230.jpg',
+  'https://p1.meituan.net/movie/7335afbfd567ca5261d28a11d5bab706106991.jpg'
 ]
 const movieList = []
 for (let i = 0; i < 40; i++) {
@@ -28,7 +32,9 @@ for (let i = 0; i < 40; i++) {
     status: Random.pick([0, 1, 2]),
     category: Random.pick(['奇幻', '动画', '惊悚', '剧情', '爱情', '悬疑', '犯罪', '战争']),
     actors: generateNameList(2, 7),
-    directors: generateNameList(1, 2)
+    directors: generateNameList(1, 2),
+    len: '@integer(60,150)',
+    lang: Random.pick(['国语', '英语', '日语', '韩语'])
   }))
 }
 
