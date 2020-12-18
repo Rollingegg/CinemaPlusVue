@@ -7,6 +7,7 @@ stages:
 BuildFiles:
   stage: npm_build
   script:
+   - cp .env.production .env
    - npm install -g cnpm --registry=https://registry.npm.taobao.org
    - cnpm install
    - cnpm run build
