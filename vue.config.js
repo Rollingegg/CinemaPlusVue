@@ -46,8 +46,6 @@ module.exports = {
   },
   // vue.config.js for less-loader@6.0.0
   css: {
-    extract: true,
-    sourceMap: false,
     loaderOptions: {
       less: {
         lessOptions: {
@@ -94,6 +92,19 @@ module.exports = {
               inline: /runtime\..*\.js$/
             }])
             .end()
+          // gzip压缩(暂时用nginx开启gzip，打包暂不压缩)
+          // 依赖"compression-webpack-plugin": "^4.0.0"(6.0或之后依赖webpack高版本，与vuecli的webpack版本不符合，会出现tapPromise undefined的错误)
+          // 定义gzip压缩文件类型
+          // const productionGzipExtensions = ['html', 'js', 'css']
+          // config
+          //   .plugin('CompressionWebpackPlugin')
+          //   .use('compression-webpack-plugin', [{
+          //     filename: '[path].gz[query]',
+          //     algorithm: 'gzip',
+          //     test: new RegExp('\\.(' + productionGzipExtensions.join('|') + ')$'),
+          //     threshold: 10240,
+          //     minRatio: 0.8
+          //   }])
           config
             .optimization.splitChunks({
               chunks: 'all',

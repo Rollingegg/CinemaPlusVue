@@ -10,7 +10,7 @@ export default new Vuex.Store({
   },
   state: {
     device: 'desktop',
-    copyright: `${new Date().getFullYear()} <a href="https://git.nju.edu.cn/beg4pass" target="_blank">Random Group</a>`
+    copyright: `${new Date().getFullYear()} <a href="https://git.nju.edu.cn/beg4pass" target="_blank" rel="noreferrer">Random Group</a>`
   },
   mutations: {
     TOGGLE_DEVICE: (state, device) => {
