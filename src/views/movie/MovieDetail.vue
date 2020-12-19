@@ -6,25 +6,27 @@
       </a-breadcrumb-item>
       <a-breadcrumb-item>{{ movieInfo.title }}</a-breadcrumb-item>
     </a-breadcrumb>
-    <div class="movie-info-container">
-      <img v-lazy="movieInfo.url" :alt="movieInfo.title"/>
-      <div class="movie-info-base">
-        <h1>{{ movieInfo.title }}</h1>
-        <ul>
-          <li>上映日期：<span>{{ movieInfo.date }}</span></li>
-          <li>时长：<span>{{ movieInfo.len }}分钟</span></li>
-          <li>类型：<span>{{ movieInfo.category }}</span></li>
-          <li>地区：<span>{{ movieInfo.date }}</span></li>
-          <li>语言：<span>{{ movieInfo.lang }}</span></li>
-          <li>导演：<span>{{ movieInfo.directors }}</span></li>
-          <li>主演：<span>{{ movieInfo.actors }}</span></li>
-        </ul>
-        <a-space>
-          <a-button icon="heart" type="primary" block>想看</a-button>
-          <a-button icon="star" block>看过</a-button>
-        </a-space>
+      <div class="movie-info-container">
+        <img v-lazy="movieInfo.url" :alt="movieInfo.title"/>
+        <a-skeleton :loading="loading" active>
+          <div class="movie-info-base">
+            <h1>{{ movieInfo.title }}</h1>
+            <ul>
+              <li>上映日期：<span>{{ movieInfo.date | dateformat('YYYY-MM-DD')}}</span></li>
+              <li>时长：<span>{{ movieInfo.len }}分钟</span></li>
+              <li>类型：<span>{{ movieInfo.category }}</span></li>
+              <li>地区：<span>{{ movieInfo.date }}</span></li>
+              <li>语言：<span>{{ movieInfo.lang }}</span></li>
+              <li>导演：<span>{{ movieInfo.directors }}</span></li>
+              <li>主演：<span>{{ movieInfo.actors }}</span></li>
+            </ul>
+            <a-space>
+              <a-button icon="heart" type="primary" block>想看</a-button>
+              <a-button icon="star" block>看过</a-button>
+            </a-space>
+          </div>
+        </a-skeleton>
       </div>
-    </div>
     <div class="movie-des-container">
       <div>
         <span>简介</span>
@@ -36,13 +38,29 @@
       <p :class="{'textCollapse':textCollapse}">{{ movieInfo.description }}</p>
     </div>
     <div class="movie-schedule-container">
-      <a-radio-group size="large" :default-value="0" button-style="solid">
-        <a-radio-button v-for="(item,index) in scheduleDateList" :key="index" :value="index">
-          {{ item }}
+      <a-radio-group size="large" :default-value="0" button-style="solid" v-model="dateIndex">
+        <a-radio-button v-for="(item,index) in scheduleData" :key="index" :value="index">
+          {{ item.date | dateformat('MM月DD日')}}
         </a-radio-button>
       </a-radio-group>
-      <a-table :columns="scheduleColumns" :data-source="scheduleData" :pagination="false">
-        <span slot="buy"><a-button type="danger" shape="round" @click="buyMovie">立即购票</a-button></span>
+      <a-table :data-source="scheduleData.length>0?scheduleData[dateIndex].scheduleItemList:[]" :pagination="false">
+        <a-table-column key="startTime" title="放映开始时间" data-index="startTime" :custom-render="renderPlayTime"/>
+        <a-table-column key="endTime" title="放映结束时间" data-index="endTime" :custom-render="renderPlayTime"/>
+        <a-table-column key="hallName" title="放映厅" data-index="hallName">
+          <template slot-scope="hallName">
+            <a-tag color="green">{{hallName}}</a-tag>
+          </template>
+        </a-table-column>
+        <a-table-column key="fare" title="票价（元）" data-index="fare">
+          <template slot-scope="fare">
+            <a-statistic :precision="2" :value="fare"/>
+          </template>
+        </a-table-column>
+        <a-table-column key="buy" title="选座购票">
+          <template slot-scope="text,record">
+            <a-button type="danger" @click="buyMovie(record.id)">立即购买</a-button>
+          </template>
+        </a-table-column>
       </a-table>
     </div>
   </section>
@@ -50,53 +68,17 @@
 
 <script>
 import pageTitle from '@/directive/page-title'
-import { fetchMovies } from '@/api/movie'
+import { fetchMovies, fetchScheduleDataByMovieId } from '@/api/movie'
 
-const scheduleColumns = [
-  {
-    title: '放映开始时间',
-    dataIndex: 'startTime',
-    key: 'startTime'
-  },
-  {
-    title: '放映结束时间',
-    dataIndex: 'endTime',
-    key: 'endTime'
-  },
-  {
-    title: '放映厅',
-    dataIndex: 'hall',
-    key: 'hall'
-  },
-  {
-    title: '票价',
-    dataIndex: 'price',
-    key: 'price'
-  },
-  {
-    title: '选座购票',
-    key: 'buy',
-    scopedSlots: { customRender: 'buy' }
-  }
-]
-const scheduleData = [
-  {
-    key: '1',
-    startTime: '01:14',
-    endTime: '预计03:14散场',
-    hall: '2号厅',
-    price: 40
-  }
-]
 export default {
   name: 'MovieDetail',
   data () {
     return {
       movieInfo: {},
-      scheduleDateList: ['今天', '明天'],
-      scheduleColumns,
-      scheduleData,
-      textCollapse: true
+      scheduleData: [],
+      textCollapse: true,
+      loading: true,
+      dateIndex: 0
     }
   },
   props: {
@@ -109,16 +91,25 @@ export default {
   },
   async mounted () {
     console.log(this.id)
+    this.loading = true
     this.movieInfo = await fetchMovies()
     this.movieInfo = this.movieInfo[0]
+    this.loading = false
+    this.scheduleData = await fetchScheduleDataByMovieId(this.id)
   },
   methods: {
-    buyMovie () {
+    buyMovie (scheduleId) {
       this.$router.push({
         name: 'movieBuy',
         query: { id: this.id },
-        params: { title: this.movieInfo.title || '' }
+        params: {
+          title: this.movieInfo.title || '',
+          scheduleId: scheduleId
+        }
       })
+    },
+    renderPlayTime (time) {
+      return this.$options.filters.dateformat(time, 'HH:mm')
     }
   }
 }
@@ -133,9 +124,13 @@ export default {
 
   img {
     width: @movie-poster-width;
+    height: @movie-poster-height;
+    border-radius: @img-radius;
 
     @media (max-width: @mobile-screen-width) {
       width: 120px;
+      height: 200px;
+      border-radius: 4px;
     }
   }
 

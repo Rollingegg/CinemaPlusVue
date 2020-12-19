@@ -24,7 +24,7 @@
       <div class="movie-card-info-item">类型：<span>{{ movieInfo.category }}</span></div>
       <div class="movie-card-info-item" v-if="!isMobile">导演：<span>{{ movieInfo.directors }}</span></div>
       <div class="movie-card-info-item">主演：<span>{{ movieInfo.actors }}</span></div>
-      <div class="movie-card-info-item">上映日期：<span>{{ movieInfo.date }}</span></div>
+      <div class="movie-card-info-item">上映日期：<span>{{ movieInfo.date | dateformat('YYYY-MM-DD')}}</span></div>
     </div>
     <div class="movie-card-button" v-if="!isDownStairs">
       <router-link :to="`/movies/${movieInfo.id}`">
@@ -53,23 +53,7 @@ export default {
     }
   },
   props: {
-    movieInfo: {
-      type: Object,
-      required: false,
-      default () {
-        return {
-          id: 1,
-          url: 'http://n.sinaimg.cn/translate/640/w600h840/20190312/ampL-hufnxfm4278816.jpg',
-          title: '夏目友人帐',
-          description: '在人与妖怪之间过着忙碌日子的夏目，偶然与以前的同学结城重逢，由此回忆起了被妖怪缠身的苦涩记忆。此时，夏目认识了在归还名字的妖怪记忆中出现的女性·津村容莉枝。和玲子相识的她，现在和独子椋雄一同过着平稳的生活。夏目通过与他们的交流，心境也变得平和。但这对母子居住的城镇，却似乎潜伏着神秘的妖怪。在调查此事归来后，寄生于猫咪老师身体的“妖之种”，在藤原家的',
-          category: '动画',
-          actors: '神谷浩史 /井上和彦 /高良健吾 /小林沙苗 /泽城美雪',
-          date: '2020-10-24',
-          likes: 313,
-          status: 1
-        }
-      }
-    }
+    movieInfo: Object
   }
 }
 </script>

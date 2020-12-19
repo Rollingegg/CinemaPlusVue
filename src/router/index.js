@@ -72,7 +72,8 @@ const routes = [
         },
         props: (route) => ({
           movieId: Number(route.query.id),
-          movieTitle: route.params.title
+          movieTitle: route.params.title,
+          scheduleId: Number(route.params.scheduleId)
         })
       },
       {

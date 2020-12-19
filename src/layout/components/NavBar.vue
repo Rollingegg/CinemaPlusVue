@@ -16,7 +16,7 @@
         <router-link to="/home" class="menu-item menu-item-title hover-effect">首页</router-link>
         <router-link to="/movies" class="menu-item menu-item-title hover-effect">电影</router-link>
       </template>
-      <a-dropdown class="menu-item hover-effect" placement="bottomCenter" :trigger="['hover','click']">
+      <a-dropdown class="menu-item hover-effect" placement="bottomCenter" :trigger="['click']">
         <div class="avatar-wrapper">
           <img :src="avatar" alt="user-avatar" class="user-avatar">
           <a-icon style="margin-left: 3px; font-size: 16px" type="down"></a-icon>

@@ -10,7 +10,7 @@
       <a-step v-for="(item,index) in steps" :key="index" :title="item" />
     </a-steps>
     <div class="step-content" v-show="current===0">
-      选座
+      选座{{`scheduleId=${scheduleId}`}}
     </div>
     <div class="step-content" v-show="current===1">
       确认订单
@@ -37,7 +37,8 @@ export default {
   },
   props: {
     movieId: Number,
-    movieTitle: String
+    movieTitle: String,
+    scheduleId: Number
   }
 }
 </script>
