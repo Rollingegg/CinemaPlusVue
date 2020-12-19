@@ -18,3 +18,10 @@ export function fetchScheduleDataByMovieId (movieId) {
     movieId: movieId
   })
 }
+
+export function fetchSeatInfoByScheduleIdAndUserId (scheduleId, userId) {
+  return request.get(`${domain}/ticket/get/occupiedSeats`, {
+    scheduleId: scheduleId,
+    userId: userId
+  })
+}

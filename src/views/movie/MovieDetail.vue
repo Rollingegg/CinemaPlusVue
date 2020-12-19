@@ -43,7 +43,7 @@
           {{ item.date | dateformat('MM月DD日')}}
         </a-radio-button>
       </a-radio-group>
-      <a-table :data-source="scheduleData.length>0?scheduleData[dateIndex].scheduleItemList:[]" :pagination="false">
+      <a-table :data-source="scheduleData.length>0?scheduleData[dateIndex].scheduleItemList:[]" :pagination="false" :scroll="isMobile?{ x: 420 }:undefined">
         <a-table-column key="startTime" title="放映开始时间" data-index="startTime" :custom-render="renderPlayTime"/>
         <a-table-column key="endTime" title="放映结束时间" data-index="endTime" :custom-render="renderPlayTime"/>
         <a-table-column key="hallName" title="放映厅" data-index="hallName">
@@ -51,12 +51,12 @@
             <a-tag color="green">{{hallName}}</a-tag>
           </template>
         </a-table-column>
-        <a-table-column key="fare" title="票价（元）" data-index="fare">
+        <a-table-column key="fare" title="票价(元)" data-index="fare" :width="isMobile?100:'auto'">
           <template slot-scope="fare">
             <a-statistic :precision="2" :value="fare"/>
           </template>
         </a-table-column>
-        <a-table-column key="buy" title="选座购票">
+        <a-table-column key="buy" title="选座购票" fixed="right" :width="isMobile?100:'auto'">
           <template slot-scope="text,record">
             <a-button type="danger" @click="buyMovie(record.id)">立即购买</a-button>
           </template>
@@ -81,6 +81,11 @@ export default {
       dateIndex: 0
     }
   },
+  computed: {
+    isMobile () {
+      return this.$store.state.device === 'mobile'
+    }
+  },
   props: {
     id: {
       type: Number
@@ -90,21 +95,23 @@ export default {
     pageTitle
   },
   async mounted () {
-    console.log(this.id)
     this.loading = true
     this.movieInfo = await fetchMovies()
     this.movieInfo = this.movieInfo[0]
     this.loading = false
     this.scheduleData = await fetchScheduleDataByMovieId(this.id)
+    console.log(this.scheduleData)
   },
   methods: {
     buyMovie (scheduleId) {
       this.$router.push({
         name: 'movieBuy',
-        query: { id: this.id },
-        params: {
-          title: this.movieInfo.title || '',
+        query: {
+          id: this.id,
           scheduleId: scheduleId
+        },
+        params: {
+          title: this.movieInfo.title || ''
         }
       })
     },
