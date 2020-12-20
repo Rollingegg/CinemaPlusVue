@@ -1,11 +1,13 @@
 import Mock from 'mockjs'
 import movie from './movie'
 import user from './user'
+import tickets from './tickets'
 import { param2Obj } from './utils'
 
 const mocks = [
   ...movie,
-  ...user
+  ...user,
+  ...tickets
 ]
 
 export function mockXHR () {
