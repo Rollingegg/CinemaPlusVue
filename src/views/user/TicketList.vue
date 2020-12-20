@@ -12,16 +12,16 @@
             :tabBarGutter="15"
             :tabBarStyle="{textAlign: 'center'}"
             style="padding: 0 2px;">
-      <a-tab-pane key="1" tab="未生效" :disabled="disables[0]">
+      <a-tab-pane key="1" tab="全 部" :disabled="disables[2]">
+        <tickets-container :tickets-list="effectiveTickets.concat(notUseTickets).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())"
+                           :loading="loading"/>
+      </a-tab-pane>
+      <a-tab-pane key="2" tab="未生效" :disabled="disables[0]">
         <tickets-container :tickets-list="effectiveTickets"
                            :loading="loading"/>
       </a-tab-pane>
-      <a-tab-pane key="2" tab="已失效" :disabled="disables[1]">
+      <a-tab-pane key="3" tab="已失效" :disabled="disables[1]">
         <tickets-container :tickets-list="notUseTickets"
-                           :loading="loading"/>
-      </a-tab-pane>
-      <a-tab-pane key="3" tab="全 部" :disabled="disables[2]">
-        <tickets-container :tickets-list="effectiveTickets.concat(notUseTickets).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())"
                            :loading="loading"/>
       </a-tab-pane>
     </a-tabs>
@@ -62,7 +62,6 @@ export default {
     this.effectiveTickets = t.filter(ticket => !this.notUseTickets.includes(ticket)).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
     if (this.effectiveTickets.length === 0) {
       this.disables[0] = true
-      this.defaultActive = '2'
     }
     this.loading = false
   }
