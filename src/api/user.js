@@ -20,3 +20,7 @@ export function register (username, password) {
     password: password
   })
 }
+
+export function fetchVipInfo (userId) {
+  return request.get(`${domain}/vip/${userId}/get`)
+}

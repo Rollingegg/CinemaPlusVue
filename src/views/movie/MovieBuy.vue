@@ -9,8 +9,8 @@
     <a-steps :current="current">
       <a-step v-for="(item,index) in steps" :key="index" :title="item"/>
     </a-steps>
-    <div class="step-content" v-show="current===0">
-      <a-row :gutter="32" type="flex" justify="center">
+    <div class="step-content" v-if="current===0">
+      <a-row :gutter="32" type="flex">
         <a-col :md="12" class="seat-container">
           <h2>{{ scheduleInfo.hallName }}<span
             v-if="seatInfo.length>0">{{ `(${seatInfo.length}*${seatInfo[0].length})` }}</span></h2>
@@ -35,7 +35,7 @@
               </ul>
             </div>
           </div>
-          <a-divider/>
+          <a-divider dashed/>
           <ul>
             <li>影厅：<span>{{ scheduleInfo.hallName }}</span></li>
             <li>场次：<span>{{ scheduleInfo.startTime | dateformat('MM月DD日 hh:mm') }}场</span></li>
@@ -46,15 +46,80 @@
               </a-tag>
             </li>
           </ul>
-          <a-divider/>
-          <a-button type="primary" :disabled="canSubmitOrder">确认下单</a-button>
+          <a-divider dashed/>
+          <a-button type="primary" :disabled="canSubmitOrder" @click="submitOrder">确认下单</a-button>
         </a-col>
       </a-row>
     </div>
-    <div class="step-content" v-show="current===1">
-      确认订单
+    <div class="step-content" v-else-if="current===1">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>电影</th>
+              <th>影厅/场次</th>
+              <th>票数/座位</th>
+              <th>单价(元)</th>
+              <th>总价(元)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{scheduleInfo.movieName}}</td>
+              <td>
+                <div>{{ scheduleInfo.hallName }}</div>
+                <div>{{ scheduleInfo.startTime | dateformat('MM月DD日 hh:mm') }}场</div>
+              </td>
+              <td>
+                <div>{{selectedSeats.length}}张</div>
+                <a-tag color="green" v-for="(seat,index) in selectedSeats" :key="index">
+                  {{ `${seat[0] + 1}排${seat[1] + 1}座` }}
+                </a-tag>
+              </td>
+              <td>{{ Number(scheduleInfo.fare).toFixed(2) }}</td>
+              <td>
+                <strong>{{ Number(orderInfo.total).toFixed(2) }}</strong>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <a-divider dashed/>
+      <div class="order-wrapper">
+        <div class="coupon-selection">
+          <span>优惠券：</span>
+          <a-select default-value="none" style="width: 150px">
+            <a-select-option value="none">不使用优惠券</a-select-option>
+            <a-select-option v-for="(coupon,i) in orderInfo.coupons" :key="i" :value="coupon">{{`满${coupon.targetAmount}减${coupon.discountAmount}`}}</a-select-option>
+          </a-select>
+        </div>
+        <div>
+          <div>总金额：￥{{ Number(orderInfo.total).toFixed(2) }}</div>
+          <div>优惠金额：无</div>
+        </div>
+      </div>
+      <a-divider dashed/>
+      <div class="order-footer">
+        <div>实付款：<b style="font-size: 20px; color: #0063B1">￥{{actualTotal}}</b></div>
+        <a-button type="primary" @click="openPayModal">立即付款</a-button>
+      </div>
+      <a-modal
+        title="付款"
+        :visible="modalVisible"
+        :confirm-loading="confirmLoading"
+        ok-text="确认"
+        cancel-text="取消"
+        @ok="submitPayment"
+        @cancel="handleCancel"
+      >
+        <a-tabs type="card">
+          <a-tab-pane key="1" tab="银行卡支付">
+            银行卡
+          </a-tab-pane>
+        </a-tabs>
+      </a-modal>
     </div>
-    <div class="step-content" v-show="current===2">
+    <div class="step-content" v-else-if="current===2">
       支付成功
     </div>
   </section>
@@ -64,7 +129,8 @@
 import pageTitle from '@/directive/page-title'
 import { mapState } from 'vuex'
 import SeatIcon from '@/components/icon/SeatIcon'
-import { fetchSeatInfoByScheduleIdAndUserId } from '@/api/movie'
+import { fetchSeatInfoByScheduleIdAndUserId, lockSeat } from '@/api/movie'
+import { fetchVipInfo } from '@/api/user'
 
 export default {
   name: 'MovieBuy',
@@ -75,7 +141,12 @@ export default {
       steps: ['选座', '确认订单，支付', '支付成功'],
       seatInfo: [],
       scheduleInfo: {},
-      selectedSeats: []
+      selectedSeats: [],
+      orderInfo: {},
+      vipInfo: {},
+      actualTotal: 0,
+      modalVisible: false,
+      confirmLoading: false
     }
   },
   computed: {
@@ -103,6 +174,15 @@ export default {
     this.scheduleInfo.length = 120
     this.seatInfo = seats
     console.log(scheduleItem, seats)
+    document.title = this.scheduleInfo.movieName
+    for (let i = 0; i < seats.length; i++) {
+      for (let j = 0; j < seats[0].length; j++) {
+        if (seats[i][j] === 3) {
+          this.selectedSeats.push([i, j])
+        }
+      }
+    }
+    this.sortSelectedSeats()
   },
   methods: {
     /**
@@ -121,6 +201,9 @@ export default {
         // 取消选中
         this.selectedSeats = this.selectedSeats.filter(value => value[0] !== i || value[1] !== j)
       }
+      this.sortSelectedSeats()
+    },
+    sortSelectedSeats () {
       // 选中座位排序
       this.selectedSeats.sort(function (x, y) {
         const res = x[0] - y[0]
@@ -134,6 +217,33 @@ export default {
         'seat-choose': Number(this.seatInfo[i][j]) === 3,
         'seat-invisible': Number(this.seatInfo[i][j]) === 0
       }
+    },
+    async submitOrder () {
+      const selectedSeatsVo = []
+      this.selectedSeats.forEach(seat => {
+        selectedSeatsVo.push({ columnIndex: seat[1], rowIndex: seat[0] })
+      })
+      this.orderInfo = await lockSeat(this.userId, this.scheduleId, selectedSeatsVo)
+      this.current = 1
+      this.actualTotal = this.orderInfo.total
+      try {
+        this.vipInfo = await fetchVipInfo(this.userId)
+      } catch (e) {
+        console.log(e)
+      }
+    },
+    openPayModal () {
+      this.modalVisible = true
+    },
+    async submitPayment () {
+      this.confirmLoading = true
+      await setTimeout(() => {
+        this.modalVisible = false
+        this.confirmLoading = false
+      }, 2000)
+    },
+    handleCancel () {
+      this.modalVisible = false
     }
   }
 }
@@ -175,6 +285,52 @@ export default {
       padding-left: @base-interval;
     }
   }
+  .table-wrapper{
+    zoom: 1;
+    table{
+      width: 100%;
+      text-align: center;
+      border-radius: 4px 4px 0 0;
+      border-collapse: separate;
+      border-spacing: 0;
+      thead{
+        tr{
+          th{
+            color: @heading-color;
+            font-weight: 500;
+            background: #fafafa;
+            border-bottom: 1px solid #e8e8e8;
+            transition: background .3s ease;
+            padding: 16px;
+            @media (max-width: @mobile-screen-width) {
+              padding: 8px;
+            }
+          }
+        }
+      }
+      tbody{
+        tr{
+          td{
+            padding: 16px;
+            @media (max-width: @mobile-screen-width) {
+              padding: 8px;
+            }
+          }
+        }
+      }
+    }
+  }
+  .order-wrapper{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .order-footer{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+  }
 }
 
 ul {
@@ -213,4 +369,5 @@ ul {
 .seat-invisible {
   display: none;
 }
+
 </style>

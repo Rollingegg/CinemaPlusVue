@@ -25,3 +25,11 @@ export function fetchSeatInfoByScheduleIdAndUserId (scheduleId, userId) {
     userId: userId
   })
 }
+
+export function lockSeat (userId, scheduleId, seats) {
+  return request.post(`${domain}/ticket/lockSeat`, {
+    userId: userId,
+    scheduleId: scheduleId,
+    seats: seats
+  })
+}
