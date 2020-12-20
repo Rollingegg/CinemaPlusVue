@@ -38,14 +38,24 @@
       <p :class="{'textCollapse':textCollapse}">{{ movieInfo.description }}</p>
     </div>
     <div class="movie-schedule-container">
-      <a-radio-group size="large" :default-value="0" button-style="solid" v-model="dateIndex">
+      <div class="nav-wrap">
+      <a-radio-group :default-value="0" button-style="solid" v-model="dateIndex" :size="isMobile?'small':'large'" class="movie-nav">
         <a-radio-button v-for="(item,index) in scheduleData" :key="index" :value="index">
-          {{ item.date | dateformat('MM月DD日')}}
+          {{ item.date | dateformat('MM月DD日', true)}}
         </a-radio-button>
       </a-radio-group>
-      <a-table :data-source="scheduleData.length>0?scheduleData[dateIndex].scheduleItemList:[]" :pagination="false" :scroll="isMobile?{ x: 420 }:undefined">
-        <a-table-column key="startTime" title="放映开始时间" data-index="startTime" :custom-render="renderPlayTime"/>
-        <a-table-column key="endTime" title="放映结束时间" data-index="endTime" :custom-render="renderPlayTime"/>
+      </div>
+      <a-table :data-source="scheduleData.length>0?scheduleData[dateIndex].scheduleItemList:[]"
+               :pagination="false"
+               :rowKey="rowKey"
+               class="sch-table">
+        <a-table-column key="startTime" :title="`放映${isMobile?'':'开始'}时间`" data-index="startTime" :width="isMobile?120:'auto'">
+          <template slot-scope="startTime,endTime" style="padding: 8px">
+            <h3 style="margin: 0">{{startTime | dateformat('hh:mm')}}</h3>
+            <div style="color: rgba(0, 0, 0, 0.45);font-size: 12px" v-if="isMobile">{{endTime | dateformat('hh:mm')}}散场</div>
+          </template>
+        </a-table-column>
+        <a-table-column key="endTime" title="放映结束时间" data-index="endTime" :custom-render="renderPlayTime" v-if="!isMobile"/>
         <a-table-column key="hallName" title="放映厅" data-index="hallName">
           <template slot-scope="hallName">
             <a-tag color="green">{{hallName}}</a-tag>
@@ -53,12 +63,13 @@
         </a-table-column>
         <a-table-column key="fare" title="票价(元)" data-index="fare" :width="isMobile?100:'auto'">
           <template slot-scope="fare">
-            <a-statistic :precision="2" :value="fare"/>
+            <a-statistic v-if="!isMobile" :precision="2" :value="fare"/>
+            <h3 v-else style="margin: 0">{{Number(fare).toFixed(2)}}</h3>
           </template>
         </a-table-column>
-        <a-table-column key="buy" title="选座购票" fixed="right" :width="isMobile?100:'auto'">
+        <a-table-column key="buy" title="选座购票" :width="isMobile?100:'auto'">
           <template slot-scope="text,record">
-            <a-button type="danger" @click="buyMovie(record.id)">立即购买</a-button>
+            <a-button type="danger" @click="buyMovie(record.id)" :size="isMobile?'small':'default'">立即购买</a-button>
           </template>
         </a-table-column>
       </a-table>
@@ -116,7 +127,10 @@ export default {
       })
     },
     renderPlayTime (time) {
-      return this.$options.filters.dateformat(time, 'HH:mm')
+      return this.$options.filters.dateformat(time, '预计HH:mm散场')
+    },
+    rowKey (record) {
+      return record.id
     }
   }
 }
@@ -195,9 +209,34 @@ export default {
 
 .movie-schedule-container {
   margin-top: @base-interval;
+  .nav-wrap{
+    //overflow-x: scroll;
+    //overflow-y: hidden;
+    white-space: nowrap;
+    // 内容超出范围时，滚动条自动显示
+    overflow: auto;
+    // 指定PC端的样式
+    //@media screen and (min-width: @mobile-screen-width){
+    //  // 隐藏滚动条
+    //  &::-webkit-scrollbar {
+    //    display: none;
+    //  }
+    //}
+    .movie-nav{
+      overflow: auto;
+    }
+  }
 }
 
 .textCollapse {
   .textOverflowMulti()
+}
+// 设置表格单元格样式，通过/deep/实现
+.sch-table{
+  & /deep/ .ant-table-row-cell-break-word{
+    @media (max-width: @mobile-screen-width) {
+      padding: 8px;
+    }
+  }
 }
 </style>

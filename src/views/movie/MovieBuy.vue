@@ -105,16 +105,27 @@ export default {
     console.log(scheduleItem, seats)
   },
   methods: {
+    /**
+     * 点击选座的响应方法
+     * @param i 排
+     * @param j 座
+     */
     selectSeat (i, j) {
       if (Number(this.seatInfo[i][j]) === 1) {
         // 使用变异方法监听数组某一项的变化
         this.$set(this.seatInfo[i], j, 3)
-        console.log(this.seatInfo)
+        // 选中座位
         this.selectedSeats.push([i, j])
       } else if (Number(this.seatInfo[i][j]) === 3) {
         this.$set(this.seatInfo[i], j, 1)
-        this.selectedSeats.push([i, j])
+        // 取消选中
+        this.selectedSeats = this.selectedSeats.filter(value => value[0] !== i || value[1] !== j)
       }
+      // 选中座位排序
+      this.selectedSeats.sort(function (x, y) {
+        const res = x[0] - y[0]
+        return res === 0 ? x[1] - y[1] : res
+      })
     },
     seatClassObject (i, j) {
       return {

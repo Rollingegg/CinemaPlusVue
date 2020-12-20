@@ -32,10 +32,28 @@ Vue.use(VueLazyload, {
  * 全局过滤器 时间戳
  * 页面使用过滤 如：
  * <cell title="还款日" :value="data | dateformat('YYYY-MM-DD')"></cell>
+ * addAlias: 是否加上今天、明天等别称
  */
-Vue.filter('dateformat', function (dataStr, pattern = 'YYYY-MM-DD') {
+Vue.filter('dateformat', function (dataStr, pattern = 'YYYY-MM-DD', addAlias = false) {
   if (dataStr) {
-    return moment(dataStr).format(pattern)
+    let inputDate = moment(dataStr)
+    const formatted = inputDate.format(pattern)
+    if (!addAlias) {
+      return formatted
+    }
+    let alias = ''
+    // 日期格式
+    inputDate = inputDate.startOf('day')
+    const today = moment().startOf('day')
+    const diff = inputDate.diff(today, 'days')
+    if (today.isSame(inputDate, 'day')) {
+      alias = '今天'
+    } else if (diff === 1) {
+      alias = '明天'
+    } else if (diff === 2) {
+      alias = '后天'
+    }
+    return `${alias}${formatted}`
   } else {
     return dataStr
   }
