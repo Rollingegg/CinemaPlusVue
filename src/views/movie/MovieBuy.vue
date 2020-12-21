@@ -6,14 +6,24 @@
       </a-breadcrumb-item>
       <a-breadcrumb-item>{{ movieTitle }}</a-breadcrumb-item>
     </a-breadcrumb>
-    <a-steps :current="current">
+    <a-steps :current="currentStep">
       <a-step v-for="(item,index) in steps" :key="index" :title="item"/>
     </a-steps>
-    <div class="step-content" v-if="current===0">
+    <div class="step-content" v-if="currentStep===0">
       <a-row :gutter="32" type="flex">
         <a-col :md="12" class="seat-container">
-          <h2>{{ scheduleInfo.hallName }}<span
-            v-if="seatInfo.length>0">{{ `(${seatInfo.length}*${seatInfo[0].length})` }}</span></h2>
+          <div class="seat-header">
+            <h3>
+              {{ scheduleInfo.hallName }}
+              <span v-if="seatInfo.length>0">{{ `(${seatInfo.length}*${seatInfo[0].length})` }}</span>
+              银幕
+            </h3>
+            <a-space>
+              <div><seat-icon/>可选</div>
+              <div><seat-icon class="seat-lock"/>已售</div>
+              <div><seat-icon class="seat-choose"/>选中</div>
+            </a-space>
+          </div>
           <div v-for="(col,i) in seatInfo" :key="i">
             <seat-icon v-for="(status,j) in col"
                        :key="j"
@@ -21,6 +31,7 @@
                        class="seat"
                        :class="seatClassObject(i,j)"/>
           </div>
+          <a-divider dashed v-if="isMobile"/>
         </a-col>
         <a-col :md="12">
           <div class="movie-info">
@@ -40,18 +51,18 @@
             <li>影厅：<span>{{ scheduleInfo.hallName }}</span></li>
             <li>场次：<span>{{ scheduleInfo.startTime | dateformat('MM月DD日 hh:mm') }}场</span></li>
             <li>座位：
-              <span v-if="canSubmitOrder">还未选择座位</span>
+              <span v-if="notSubmitOrder">还未选择座位</span>
               <a-tag color="green" v-for="(seat,index) in selectedSeats" :key="index">
                 {{ `${seat[0] + 1}排${seat[1] + 1}座` }}
               </a-tag>
             </li>
           </ul>
           <a-divider dashed/>
-          <a-button type="primary" :disabled="canSubmitOrder" @click="submitOrder">确认下单</a-button>
+          <a-button type="primary" :disabled="notSubmitOrder" @click="submitOrder">{{notSubmitOrder?'请先选座':'确认下单'}}</a-button>
         </a-col>
       </a-row>
     </div>
-    <div class="step-content" v-else-if="current===1">
+    <div class="step-content" v-else-if="currentStep===1">
       <div class="table-wrapper">
         <table>
           <thead>
@@ -86,16 +97,19 @@
       </div>
       <a-divider dashed/>
       <div class="order-wrapper">
-        <div class="coupon-selection">
-          <span>优惠券：</span>
-          <a-select default-value="none" style="width: 150px">
-            <a-select-option value="none">不使用优惠券</a-select-option>
-            <a-select-option v-for="(coupon,i) in orderInfo.coupons" :key="i" :value="coupon">{{`满${coupon.targetAmount}减${coupon.discountAmount}`}}</a-select-option>
+        <div>
+          <a-tooltip title="可与会员折扣优惠叠加" placement="topLeft">
+            <a-icon type="question-circle" />
+            <label>优惠券：</label>
+          </a-tooltip>
+          <a-select :default-value="-1" style="width: 150px" @change="selectCoupon">
+            <a-select-option :value="-1">不使用优惠券</a-select-option>
+            <a-select-option v-for="(coupon,i) in orderInfo.coupons" :key="i" :value="i">{{`满${orderInfo.coupons[i].targetAmount}减${orderInfo.coupons[i].discountAmount}`}}</a-select-option>
           </a-select>
         </div>
         <div>
-          <div>总金额：￥{{ Number(orderInfo.total).toFixed(2) }}</div>
-          <div>优惠金额：无</div>
+          <div>总金额：<b>￥{{ Number(orderInfo.total).toFixed(2) }}</b></div>
+          <div>优惠金额：<b>{{ discounts>0?`￥${discounts}`:'无'}}</b></div>
         </div>
       </div>
       <a-divider dashed/>
@@ -107,20 +121,55 @@
         title="付款"
         :visible="modalVisible"
         :confirm-loading="confirmLoading"
-        ok-text="确认"
+        ok-text="确认支付"
         cancel-text="取消"
         @ok="submitPayment"
         @cancel="handleCancel"
       >
         <a-tabs type="card">
           <a-tab-pane key="1" tab="银行卡支付">
-            银行卡
+            <a-form-model
+              :model="form"
+              ref="payForm"
+              :rules="payFormRules"
+              :label-col="labelCol"
+              :wrapper-col="wrapperCol">
+              <a-form-model-item label="银行卡号"
+                                 prop="card">
+                <a-input
+                  allow-clear
+                  ref="card"
+                  placeholder="银行卡号：123123123"
+                  v-model="form.card" />
+              </a-form-model-item>
+              <a-form-model-item label="支付密码"
+                                 prop="password">
+                <a-input-password
+                  allow-clear
+                  placeholder="银行卡密码：123123"
+                  ref="password"
+                  v-model="form.password" />
+              </a-form-model-item>
+            </a-form-model>
           </a-tab-pane>
         </a-tabs>
       </a-modal>
     </div>
-    <div class="step-content" v-else-if="current===2">
-      支付成功
+    <div class="step-content" v-else-if="currentStep===2">
+      <a-result
+        status="success"
+        title="支付成功"
+        :sub-title="`购买时间：${purchaseTime}`"
+      >
+        <template #extra>
+          <a-button key="console" type="primary">
+            查看我的电影票
+          </a-button>
+          <a-button key="buy">
+            Buy Again
+          </a-button>
+        </template>
+      </a-result>
     </div>
   </section>
 </template>
@@ -129,7 +178,7 @@
 import pageTitle from '@/directive/page-title'
 import { mapState } from 'vuex'
 import SeatIcon from '@/components/icon/SeatIcon'
-import { fetchSeatInfoByScheduleIdAndUserId, lockSeat } from '@/api/movie'
+import { completeTicket, fetchSeatInfoByScheduleIdAndUserId, lockSeat } from '@/api/movie'
 import { fetchVipInfo } from '@/api/user'
 
 export default {
@@ -137,24 +186,51 @@ export default {
   components: { SeatIcon },
   data () {
     return {
-      current: 0,
+      currentStep: 0,
       steps: ['选座', '确认订单，支付', '支付成功'],
       seatInfo: [],
       scheduleInfo: {},
       selectedSeats: [],
       orderInfo: {},
       vipInfo: {},
+      discounts: 0,
       actualTotal: 0,
       modalVisible: false,
-      confirmLoading: false
+      confirmLoading: false,
+      form: {
+        card: '',
+        password: ''
+      },
+      payFormRules: {
+        card: [
+          { required: true, message: '请输入您的银行卡号', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入您的密码', trigger: 'blur' }
+        ]
+      },
+      labelCol: {
+        md: { span: 4 },
+        sm: { span: 6 }
+      },
+      wrapperCol: {
+        md: { span: 20 },
+        sm: { span: 18 }
+      },
+      currentCoupon: { id: 0 }, // 选择的优惠券
+      ticketIds: [], // 返回ticketVoList中的ticketId
+      purchaseTime: ''
     }
   },
   computed: {
     ...mapState({
       userId: state => state.user.id
     }),
-    canSubmitOrder () {
+    notSubmitOrder () {
       return this.selectedSeats.length === 0
+    },
+    isMobile () {
+      return this.$store.state.device === 'mobile'
     }
   },
   directives: {
@@ -218,29 +294,63 @@ export default {
         'seat-invisible': Number(this.seatInfo[i][j]) === 0
       }
     },
+    /**
+     * 第一步：选好座位
+     */
     async submitOrder () {
       const selectedSeatsVo = []
       this.selectedSeats.forEach(seat => {
         selectedSeatsVo.push({ columnIndex: seat[1], rowIndex: seat[0] })
       })
       this.orderInfo = await lockSeat(this.userId, this.scheduleId, selectedSeatsVo)
-      this.current = 1
+      // 当前页面
+      this.currentStep = 1
+      // 设置支付所需信息
       this.actualTotal = this.orderInfo.total
+      this.orderInfo.ticketVOList.forEach(ticketInfo => {
+        this.ticketIds.push(ticketInfo.id)
+      })
       try {
         this.vipInfo = await fetchVipInfo(this.userId)
       } catch (e) {
         console.log(e)
       }
     },
+    selectCoupon (couponIndex) {
+      console.log(couponIndex)
+      this.currentCoupon = couponIndex === -1 ? { id: 0, discountAmount: 0 } : this.orderInfo.coupons[couponIndex]
+      this.discounts = this.currentCoupon.discountAmount
+      this.actualTotal = (parseFloat(this.orderInfo.total) - parseFloat(this.discounts)).toFixed(2)
+    },
     openPayModal () {
       this.modalVisible = true
+      this.confirmLoading = false
     },
-    async submitPayment () {
+    /**
+     * 提交支付表单，指定账户为123123123，密码为123123
+     */
+    submitPayment () {
       this.confirmLoading = true
-      await setTimeout(() => {
-        this.modalVisible = false
-        this.confirmLoading = false
-      }, 2000)
+      this.$refs.payForm.validate(async valid => {
+        if (valid) {
+          if (this.form.card === '123123123' && this.form.password === '123123') {
+            try {
+              await completeTicket(this.userId, this.ticketIds, this.orderInfo.total, this.currentCoupon.id)
+              this.$message.success('支付成功')
+              this.currentStep = 2
+              this.purchaseTime = this.$options.filters.dateformat(new Date(), 'YYYY-MM-DD hh:mm a')
+            } catch (e) {
+              this.$message.error('支付失败')
+            }
+          } else {
+            this.$message.error('银行卡密码错误，请重新输入')
+          }
+          this.confirmLoading = false
+          this.modalVisible = false
+        } else {
+          return false
+        }
+      })
     },
     handleCancel () {
       this.modalVisible = false
@@ -264,11 +374,22 @@ export default {
       border: none;
     }
 
-    h2 {
-      span {
-        color: @text-color-secondary;
+    .seat-header{
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 0 8px;
+      margin: 8px;
+      background: @base-border-color;
+      border-radius: 0 0 30px 30px;
+      h3 {
+        margin: 0 @base-interval 0 0;
+        span {
+          color: @text-color-secondary;
+        }
       }
     }
+
   }
 
   .movie-info {

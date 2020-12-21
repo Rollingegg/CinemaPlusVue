@@ -33,3 +33,20 @@ export function lockSeat (userId, scheduleId, seats) {
     seats: seats
   })
 }
+
+/**
+ * 支付完成购买
+ * @param userId 用户id
+ * @param ticketIds 电影票id列表，每个座位对应一个
+ * @param total 总价
+ * @param couponId 优惠券id，无则默认为0
+ * @param useVipCard 是否使用vipCard，默认不使用
+ * @returns {Promise<AxiosResponse<any>>}
+ */
+export function completeTicket (userId, ticketIds, total, couponId = 0, useVipCard = false) {
+  const body = { id: ticketIds, couponId: couponId, total: total, userId: userId }
+  if (useVipCard) {
+    return request.post(`${domain}/ticket/vip/buy`, body)
+  }
+  return request.post(`${domain}/ticket/buy`, body)
+}
