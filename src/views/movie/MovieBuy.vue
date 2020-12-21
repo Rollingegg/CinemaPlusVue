@@ -111,13 +111,12 @@
           </a-tooltip>
           <a-select :default-value="orderInfo.coupons?0:-1"
                     v-model="currentCouponIndex"
-                    style="width: 100px"
-                    @change="selectCoupon">
+                    style="width: 100px">
             <a-select-option :value="-1">不使用优惠券</a-select-option>
             <a-select-option v-for="(coupon,i) in orderInfo.coupons" :key="i" :value="i">{{`满${orderInfo.coupons[i].targetAmount}减${orderInfo.coupons[i].discountAmount}`}}</a-select-option>
           </a-select>
         </div>
-        <div align="right">
+        <div style="text-align: right">
           <div>总金额：<b>￥{{ originTotal | fixedNumber }}</b></div>
           <div v-if="isVip">会员折扣：<b>￥{{ originTotal - orderInfo.total | fixedNumber }}</b></div>
           <div>优惠券折扣：<b>￥{{ discounts>0?`${discounts}`:'无' | fixedNumber}}</b></div>
@@ -212,7 +211,7 @@ export default {
       vipInfo: null,
       modalVisible: false,
       confirmLoading: false,
-      payMethod: 1,
+      payMethod: 1, // 支付方式1为银行卡支付2为会员卡支付
       form: {
         card: '',
         password: ''
@@ -355,15 +354,13 @@ export default {
         console.log(e)
       }
     },
-    selectCoupon (couponIndex) {
-      console.log(couponIndex)
-    },
     openPayModal () {
       this.modalVisible = true
       this.confirmLoading = false
     },
     /**
-     * 提交支付表单，指定账户为123123123，密码为123123
+     * 第二步，提交支付表单，银行卡指定账户为123123123，密码为123123
+     * 默认如为会员，使用会员卡支付，非会员或者支付失败后自动切换到银行卡支付
      */
     async submitPayment () {
       this.confirmLoading = true
@@ -375,6 +372,7 @@ export default {
               try {
                 await completeTicket(this.userId, this.ticketIds, this.orderInfo.total, this.currentCoupon.id)
                 this.$message.success('支付成功')
+                // 切换到第三步
                 this.currentStep = 2
                 this.purchaseTime = this.$options.filters.dateformat(new Date(), 'YYYY-MM-DD hh:mm a')
               } catch (e) {
@@ -397,6 +395,7 @@ export default {
           this.purchaseTime = this.$options.filters.dateformat(new Date(), 'YYYY-MM-DD hh:mm a')
           this.modalVisible = false
         } catch (e) {
+          // 自动切换为银行卡支付
           this.payMethod = 1
         } finally {
           this.confirmLoading = false
