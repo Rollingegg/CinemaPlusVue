@@ -94,25 +94,24 @@ const request = {
   post (url, params) {
     // 是否使用原生表单提交，对应springboot后端为不加@RequestBody注解的入参
     const useFormPost = false
-    const contentType = useFormPost ? 'application/x-www-form-urlencoded' : 'application/json'
-    return BACKEND_REQUEST.post(url, params, {
-      transformRequest: [(params) => {
-        let result = ''
-        if (useFormPost) {
+    if (useFormPost) {
+      return BACKEND_REQUEST.post(url, params, {
+        transformRequest: [(params) => {
+          let result = ''
           Object.keys(params).forEach((key) => {
             if (!Object.is(params[key], undefined) && !Object.is(params[key], null)) {
               result += encodeURIComponent(key) + '=' + encodeURIComponent(params[key]) + '&'
             }
           })
-        } else {
-          result = JSON.stringify(params)
+          return result
+        }],
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
         }
-        return result
-      }],
-      headers: {
-        'Content-Type': contentType
-      }
-    })
+      })
+    } else {
+      return BACKEND_REQUEST.post(url, params)
+    }
   },
   delete (url, params) {
     return BACKEND_REQUEST.delete(param2urlencoded(url, params))

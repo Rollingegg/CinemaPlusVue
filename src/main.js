@@ -59,6 +59,14 @@ Vue.filter('dateformat', function (dataStr, pattern = 'YYYY-MM-DD', addAlias = f
   }
 })
 
+Vue.filter('fixedNumber', function (num, nDigits = 2) {
+  if (parseFloat(num).toString() !== 'NaN' && nDigits >= 0) {
+    return parseFloat(num).toFixed(nDigits)
+  } else {
+    return num
+  }
+})
+
 new Vue({
   router,
   store,

@@ -10,8 +10,8 @@
       <a-step v-for="(item,index) in steps" :key="index" :title="item"/>
     </a-steps>
     <div class="step-content" v-if="currentStep===0">
-      <a-row :gutter="32" type="flex">
-        <a-col :md="12" class="seat-container">
+      <a-row :gutter="32" type="flex" justify="center">
+        <a-col :xs="24" :md="16" class="seat-container">
           <div class="seat-header">
             <h3>
               {{ scheduleInfo.hallName }}
@@ -24,16 +24,18 @@
               <div><seat-icon class="seat-choose"/>选中</div>
             </a-space>
           </div>
-          <div v-for="(col,i) in seatInfo" :key="i">
-            <seat-icon v-for="(status,j) in col"
-                       :key="j"
-                       @click.native="selectSeat(i,j)"
-                       class="seat"
-                       :class="seatClassObject(i,j)"/>
+          <div class="seat-wrapper">
+            <div v-for="(col,i) in seatInfo" :key="i">
+              <seat-icon v-for="(status,j) in col"
+                         :key="j"
+                         @click.native="selectSeat(i,j)"
+                         class="seat"
+                         :class="seatClassObject(i,j)"/>
+            </div>
           </div>
           <a-divider dashed v-if="isMobile"/>
         </a-col>
-        <a-col :md="12">
+        <a-col :xs="24" :md="8">
           <div class="movie-info">
             <img v-lazy="scheduleInfo.url" :alt="scheduleInfo.movieName"/>
             <div>
@@ -58,7 +60,12 @@
             </li>
           </ul>
           <a-divider dashed/>
-          <a-button type="primary" :disabled="notSubmitOrder" @click="submitOrder">{{notSubmitOrder?'请先选座':'确认下单'}}</a-button>
+          <a-button type="primary"
+                    :disabled="notSubmitOrder"
+                    :block="isMobile"
+                    @click="submitOrder">
+            {{notSubmitOrder?'请先选座':'确认下单'}}
+          </a-button>
         </a-col>
       </a-row>
     </div>
@@ -87,9 +94,9 @@
                   {{ `${seat[0] + 1}排${seat[1] + 1}座` }}
                 </a-tag>
               </td>
-              <td>{{ Number(scheduleInfo.fare).toFixed(2) }}</td>
+              <td>{{ Number(scheduleInfo.fare) | fixedNumber }}</td>
               <td>
-                <strong>{{ Number(orderInfo.total).toFixed(2) }}</strong>
+                <strong>{{ originTotal | fixedNumber }}</strong>
               </td>
             </tr>
           </tbody>
@@ -102,20 +109,24 @@
             <a-icon type="question-circle" />
             <label>优惠券：</label>
           </a-tooltip>
-          <a-select :default-value="-1" style="width: 150px" @change="selectCoupon">
+          <a-select :default-value="orderInfo.coupons?0:-1"
+                    v-model="currentCouponIndex"
+                    style="width: 100px"
+                    @change="selectCoupon">
             <a-select-option :value="-1">不使用优惠券</a-select-option>
             <a-select-option v-for="(coupon,i) in orderInfo.coupons" :key="i" :value="i">{{`满${orderInfo.coupons[i].targetAmount}减${orderInfo.coupons[i].discountAmount}`}}</a-select-option>
           </a-select>
         </div>
-        <div>
-          <div>总金额：<b>￥{{ Number(orderInfo.total).toFixed(2) }}</b></div>
-          <div>优惠金额：<b>{{ discounts>0?`￥${discounts}`:'无'}}</b></div>
+        <div align="right">
+          <div>总金额：<b>￥{{ originTotal | fixedNumber }}</b></div>
+          <div v-if="isVip">会员折扣：<b>￥{{ originTotal - orderInfo.total | fixedNumber }}</b></div>
+          <div>优惠券折扣：<b>￥{{ discounts>0?`${discounts}`:'无' | fixedNumber}}</b></div>
         </div>
       </div>
       <a-divider dashed/>
       <div class="order-footer">
-        <div>实付款：<b style="font-size: 20px; color: #0063B1">￥{{actualTotal}}</b></div>
-        <a-button type="primary" @click="openPayModal">立即付款</a-button>
+        <div>需支付：<b class="pay-fare">￥{{actualTotal | fixedNumber}}</b></div>
+        <a-button type="primary" @click="openPayModal" :block="isMobile">确认订单，立即付款</a-button>
       </div>
       <a-modal
         title="付款"
@@ -126,8 +137,8 @@
         @ok="submitPayment"
         @cancel="handleCancel"
       >
-        <a-tabs type="card">
-          <a-tab-pane key="1" tab="银行卡支付">
+        <a-tabs type="card" v-model="payMethod">
+          <a-tab-pane :key="1" tab="银行卡支付">
             <a-form-model
               :model="form"
               ref="payForm"
@@ -152,6 +163,10 @@
               </a-form-model-item>
             </a-form-model>
           </a-tab-pane>
+          <a-tab-pane :key="2" tab="会员卡支付" v-if="isVip">
+            <div><b>会员卡余额：</b>{{vipInfo.balance | fixedNumber}}</div>
+            <div><b>支付金额：</b>{{actualTotal | fixedNumber}}</div>
+          </a-tab-pane>
         </a-tabs>
       </a-modal>
     </div>
@@ -162,11 +177,13 @@
         :sub-title="`购买时间：${purchaseTime}`"
       >
         <template #extra>
-          <a-button key="console" type="primary">
-            查看我的电影票
-          </a-button>
-          <a-button key="buy">
-            Buy Again
+          <router-link to="/user/tickets">
+            <a-button key="console" type="primary">
+              查看我的电影票
+            </a-button>
+          </router-link>
+          <a-button key="buy" @click="buyAgain">
+            再次购买
           </a-button>
         </template>
       </a-result>
@@ -192,11 +209,10 @@ export default {
       scheduleInfo: {},
       selectedSeats: [],
       orderInfo: {},
-      vipInfo: {},
-      discounts: 0,
-      actualTotal: 0,
+      vipInfo: null,
       modalVisible: false,
       confirmLoading: false,
+      payMethod: 1,
       form: {
         card: '',
         password: ''
@@ -217,7 +233,7 @@ export default {
         md: { span: 20 },
         sm: { span: 18 }
       },
-      currentCoupon: { id: 0 }, // 选择的优惠券
+      currentCouponIndex: -1,
       ticketIds: [], // 返回ticketVoList中的ticketId
       purchaseTime: ''
     }
@@ -229,8 +245,26 @@ export default {
     notSubmitOrder () {
       return this.selectedSeats.length === 0
     },
+    originTotal () {
+      return this.scheduleInfo.fare * this.selectedSeats.length
+    },
     isMobile () {
       return this.$store.state.device === 'mobile'
+    },
+    isVip () {
+      return !Object.is(this.vipInfo, undefined) && this.vipInfo !== null
+    },
+    discounts () {
+      return this.currentCoupon.discountAmount
+    },
+    // 选择的优惠券
+    currentCoupon () {
+      return this.currentCouponIndex === -1 ? { id: 0, discountAmount: 0 } : this.orderInfo.coupons[this.currentCouponIndex]
+    },
+    // 实付金额
+    actualTotal () {
+      if (this.orderInfo.total) { return this.orderInfo.total - this.discounts }
+      return this.originTotal - this.discounts
     }
   },
   directives: {
@@ -241,26 +275,30 @@ export default {
     movieTitle: String,
     scheduleId: Number
   },
-  async mounted () {
-    const { scheduleItem, seats } = await fetchSeatInfoByScheduleIdAndUserId(this.scheduleId, this.userId)
-    this.scheduleInfo = scheduleItem
-    this.scheduleInfo.url = 'https://p1.meituan.net/moviemachine/56d4089f70bce77395597e0b5b6ff3a12891795.jpg'
-    this.scheduleInfo.actors = '张三/李四/王五'
-    this.scheduleInfo.category = '悬疑/爱情'
-    this.scheduleInfo.length = 120
-    this.seatInfo = seats
-    console.log(scheduleItem, seats)
-    document.title = this.scheduleInfo.movieName
-    for (let i = 0; i < seats.length; i++) {
-      for (let j = 0; j < seats[0].length; j++) {
-        if (seats[i][j] === 3) {
-          this.selectedSeats.push([i, j])
-        }
-      }
-    }
-    this.sortSelectedSeats()
+  mounted () {
+    this.init()
   },
   methods: {
+    async init () {
+      const { scheduleItem, seats } = await fetchSeatInfoByScheduleIdAndUserId(this.scheduleId, this.userId)
+      this.scheduleInfo = scheduleItem
+      this.scheduleInfo.url = 'https://p1.meituan.net/moviemachine/56d4089f70bce77395597e0b5b6ff3a12891795.jpg'
+      this.scheduleInfo.actors = '张三/李四/王五'
+      this.scheduleInfo.category = '悬疑/爱情'
+      this.scheduleInfo.length = 120
+      this.seatInfo = seats
+      console.log(scheduleItem, seats)
+      document.title = this.scheduleInfo.movieName
+      this.selectedSeats = []
+      for (let i = 0; i < seats.length; i++) {
+        for (let j = 0; j < seats[0].length; j++) {
+          if (seats[i][j] === 3) {
+            this.selectedSeats.push([i, j])
+          }
+        }
+      }
+      this.sortSelectedSeats()
+    },
     /**
      * 点击选座的响应方法
      * @param i 排
@@ -306,21 +344,19 @@ export default {
       // 当前页面
       this.currentStep = 1
       // 设置支付所需信息
-      this.actualTotal = this.orderInfo.total
+      this.currentCouponIndex = this.orderInfo.coupons.length - 1
       this.orderInfo.ticketVOList.forEach(ticketInfo => {
         this.ticketIds.push(ticketInfo.id)
       })
       try {
         this.vipInfo = await fetchVipInfo(this.userId)
+        this.payMethod = 2
       } catch (e) {
         console.log(e)
       }
     },
     selectCoupon (couponIndex) {
       console.log(couponIndex)
-      this.currentCoupon = couponIndex === -1 ? { id: 0, discountAmount: 0 } : this.orderInfo.coupons[couponIndex]
-      this.discounts = this.currentCoupon.discountAmount
-      this.actualTotal = (parseFloat(this.orderInfo.total) - parseFloat(this.discounts)).toFixed(2)
     },
     openPayModal () {
       this.modalVisible = true
@@ -329,31 +365,54 @@ export default {
     /**
      * 提交支付表单，指定账户为123123123，密码为123123
      */
-    submitPayment () {
+    async submitPayment () {
       this.confirmLoading = true
-      this.$refs.payForm.validate(async valid => {
-        if (valid) {
-          if (this.form.card === '123123123' && this.form.password === '123123') {
-            try {
-              await completeTicket(this.userId, this.ticketIds, this.orderInfo.total, this.currentCoupon.id)
-              this.$message.success('支付成功')
-              this.currentStep = 2
-              this.purchaseTime = this.$options.filters.dateformat(new Date(), 'YYYY-MM-DD hh:mm a')
-            } catch (e) {
-              this.$message.error('支付失败')
+      // 使用银行卡支付
+      if (this.payMethod === 1) {
+        this.$refs.payForm.validate(async valid => {
+          if (valid) {
+            if (this.form.card === '123123123' && this.form.password === '123123') {
+              try {
+                await completeTicket(this.userId, this.ticketIds, this.orderInfo.total, this.currentCoupon.id)
+                this.$message.success('支付成功')
+                this.currentStep = 2
+                this.purchaseTime = this.$options.filters.dateformat(new Date(), 'YYYY-MM-DD hh:mm a')
+              } catch (e) {
+                this.$message.error('支付失败')
+              }
+            } else {
+              this.$message.error('银行卡密码错误，请重新输入')
             }
+            this.confirmLoading = false
+            this.modalVisible = false
           } else {
-            this.$message.error('银行卡密码错误，请重新输入')
+            return false
           }
-          this.confirmLoading = false
+        })
+      } else {
+        try {
+          await completeTicket(this.userId, this.ticketIds, this.orderInfo.total, this.currentCoupon.id, true)
+          this.$message.success('支付成功')
+          this.currentStep = 2
+          this.purchaseTime = this.$options.filters.dateformat(new Date(), 'YYYY-MM-DD hh:mm a')
           this.modalVisible = false
-        } else {
-          return false
+        } catch (e) {
+          this.payMethod = 1
+        } finally {
+          this.confirmLoading = false
         }
-      })
+      }
     },
     handleCancel () {
       this.modalVisible = false
+    },
+    buyAgain () {
+      this.init()
+      // 重置状态
+      this.currentStep = 0
+      this.currentCouponIndex = -1
+      this.ticketIds = []
+      this.payMethod = 1
     }
   }
 }
@@ -390,6 +449,9 @@ export default {
       }
     }
 
+    .seat-wrapper{
+      text-align: center;
+    }
   }
 
   .movie-info {
@@ -444,13 +506,13 @@ export default {
   .order-wrapper{
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
   }
   .order-footer{
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    align-items: flex-end;
+    justify-content: center;
+    align-items: center;
   }
 }
 
@@ -490,5 +552,8 @@ ul {
 .seat-invisible {
   display: none;
 }
-
+.pay-fare{
+  font-size: 40px;
+  color: #0063B1
+}
 </style>
