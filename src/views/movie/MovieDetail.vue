@@ -17,8 +17,8 @@
               <li>类型：<span>{{ movieInfo.type }}</span></li>
               <li>地区：<span>{{ movieInfo.country||'中国' }}</span></li>
               <li>语言：<span>{{ movieInfo.language||'国语' }}</span></li>
-              <li>导演：<span>{{ movieInfo.director }}</span></li>
-              <li>主演：<span>{{ movieInfo.starring }}</span></li>
+              <li>导演：<a-tooltip :title="movieInfo.director"><span>{{ movieInfo.director }}</span></a-tooltip></li>
+              <li>主演：<a-tooltip :title="movieInfo.starring"><span>{{ movieInfo.starring }}</span></a-tooltip></li>
             </ul>
             <a-space>
               <a-button :type="isLike?'primary':'default'"
