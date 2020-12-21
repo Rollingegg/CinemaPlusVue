@@ -13,6 +13,17 @@ export function fetchMovieRank (param) {
   return request.get('/api/movies/rank', param)
 }
 
+export function fetchMovieDetail (userId, movieId) {
+  return request.get(`${domain}/movie/${movieId}/${userId}`)
+}
+
+export function updateMovieLike (userId, movieId, isLike) {
+  if (isLike) {
+    return request.post(`${domain}/movie/${movieId}/unlike/?userId=${userId}`)
+  }
+  return request.post(`${domain}/movie/${movieId}/like/?userId=${userId}`)
+}
+
 export function fetchScheduleDataByMovieId (movieId) {
   return request.get(`${domain}/schedule/search/audience`, {
     movieId: movieId

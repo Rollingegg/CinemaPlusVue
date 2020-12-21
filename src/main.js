@@ -52,6 +52,11 @@ Vue.filter('dateformat', function (dataStr, pattern = 'YYYY-MM-DD', addAlias = f
       alias = '明天'
     } else if (diff === 2) {
       alias = '后天'
+    } else if (diff === -1) {
+      alias = '昨天'
+    } else {
+      const dayOfWeek = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+      alias = dayOfWeek[Number(inputDate.format('d'))]
     }
     return `${alias}${formatted}`
   } else {
