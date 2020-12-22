@@ -1,30 +1,30 @@
 <template>
-  <div class="movie-card">
+  <div class="movie-card" @click="jump2movie">
     <div class="movie-card-poster-wrapper">
-      <img v-lazy="movieInfo.url" :alt="movieInfo.title"/>
+      <img v-lazy="movieInfo.posterUrl" :alt="movieInfo.name"/>
     </div>
     <div class="movie-card-info">
       <div class="movie-card-info-title">
         <div>
-          <div class="movie-title">{{ movieInfo.title }}</div>
+          <div class="movie-title">{{ movieInfo.name }}</div>
           <div v-if="!isMobile">
-            <a-tag v-if="movieInfo.status===1" color="#f5222d">热映中</a-tag>
-            <a-tag v-else-if="movieInfo.status===2" color="#0063B1">将上映</a-tag>
+            <a-tag v-if="movieInfo.status===0" color="#f5222d">热映中</a-tag>
+<!--            <a-tag v-else-if="movieInfo.status===1" color="#0063B1">将上映</a-tag>-->
             <a-tag v-else color="rgba(0, 0, 0, 0.25)">已下架</a-tag>
           </div>
         </div>
         <div v-if="!isMobile">
-          <a-icon class="movie-like-icon" type="heart"/>
-          <div><i>{{ movieInfo.likes }}</i>人想看</div>
+<!--          <a-icon class="movie-like-icon" type="heart" />-->
+          <div><i>{{ movieInfo.likeCount || 0 }}</i>人想看</div>
         </div>
       </div>
       <div class="movie-card-info-description" v-if="!isMobile">
         {{ movieInfo.description }}
       </div>
-      <div class="movie-card-info-item">类型：<span>{{ movieInfo.category }}</span></div>
-      <div class="movie-card-info-item" v-if="!isMobile">导演：<span>{{ movieInfo.directors }}</span></div>
-      <div class="movie-card-info-item">主演：<span>{{ movieInfo.actors }}</span></div>
-      <div class="movie-card-info-item">上映日期：<span>{{ movieInfo.date | dateformat('YYYY-MM-DD')}}</span></div>
+      <div class="movie-card-info-item">时长：<span>{{ movieInfo.length }}分钟</span></div>
+      <div class="movie-card-info-item" v-if="!isMobile">导演：<span>{{ movieInfo.director }}</span></div>
+      <div class="movie-card-info-item">主演：<span>{{ movieInfo.starring }}</span></div>
+      <div class="movie-card-info-item">上映日期：<span>{{ movieInfo.startDate | dateformat('YYYY-MM-DD')}}</span></div>
     </div>
     <div class="movie-card-button" v-if="!isDownStairs">
       <router-link :to="`/movies/${movieInfo.id}`">
@@ -46,14 +46,21 @@ export default {
       return this.$store.state.device === 'mobile'
     },
     isDownStairs () {
-      return this.movieInfo.status === 0
+      return this.movieInfo.status === 1
     },
     isPlaying () {
-      return this.movieInfo.status === 1
+      return this.movieInfo.status === 0
     }
   },
   props: {
     movieInfo: Object
+  },
+  methods: {
+    jump2movie () {
+      if (this.isMobile) {
+        this.$router.push(`/movies/${this.movieInfo.id}`)
+      }
+    }
   }
 }
 </script>

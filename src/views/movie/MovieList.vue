@@ -19,7 +19,7 @@ import MovieCard from '@/components/MovieCard'
 import { fetchMovies } from '@/api/movie'
 
 const isEmpty = (object) => {
-  return Object.is(object, undefined) || object === null || object.length === 0
+  return Object.is(object, undefined) || object === null || (object.length === 0 && object !== '')
 }
 
 export default {
@@ -45,6 +45,16 @@ export default {
   },
   components: {
     MovieCard
+  },
+  watch: {
+    $route: {
+      handler (route) {
+        if (route.query) {
+          this.fetchAllMovies()
+        }
+      },
+      immediate: true
+    }
   },
   async mounted () {
     await this.fetchAllMovies()

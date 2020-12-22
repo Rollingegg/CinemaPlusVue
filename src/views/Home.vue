@@ -12,10 +12,10 @@
           <ul :class="{'movies-list-container': !isMobile,'movies-list-container-mobile': isMobile}">
             <li v-for="(item, index) in moviesCurrent" :key="index">
               <movie-poster :movie-id="item.id"
-                            :movie-name="item.title"
-                            :movie-poster-url="item.url"
-                            :rate="Number(item.rate)"
-                            :pub-date="new Date(item.date)"/>
+                            :movie-name="item.name"
+                            :movie-poster-url="item.posterUrl"
+                            :rate="parseFloat(((Math.random() * 39 + 60) / 10).toFixed(1))"
+                            :pub-date="new Date(item.startDate)"/>
             </li>
           </ul>
         </section>
@@ -28,17 +28,17 @@
           <a-list v-if="!loading" :data-source="rankList.slice(1)" class="movies-rank-container">
             <router-link :to="`/movies/${rankList[0].id}`" slot="header" class="rank-first">
               <i class="rank-first-icon"></i>
-              <img :src="rankList[0].url" alt="movie-poster" class="rank-first-movie"/>
+              <img :src="rankList[0].posterUrl" alt="movie-poster" class="rank-first-movie"/>
               <div class="rank-first-info">
-                <h3>{{ rankList[0].title }}</h3>
-                <a-statistic :value="rankList[0].likes" :value-style="{color: '#0063B1'}"></a-statistic>
+                <h3>{{ rankList[0].name }}</h3>
+                <a-statistic :value="rankList[0].likeCount" :value-style="{color: '#0063B1'}"></a-statistic>
               </div>
             </router-link>
             <a-list-item slot="renderItem" slot-scope="item,index" class="rank-item">
               <router-link :to="`/movies/${item.id}`" class="rank-item-normal">
                 <div class="movie-rank-title">
-                  <i :style="{color: getRankColor(index),fontSize: '24px',marginRight: '20px'}">{{ index + 2 }}</i>{{ item.title }}</div>
-                <a-statistic :value="item.likes" :value-style="{color: '#0063B1'}"></a-statistic>
+                  <i :style="{color: getRankColor(index),fontSize: '24px',marginRight: '20px'}">{{ index + 2 }}</i>{{ item.name }}</div>
+                <a-statistic :value="item.likeCount" :value-style="{color: '#0063B1'}"></a-statistic>
               </router-link>
               <a-skeleton :loading="loading" active/>
             </a-list-item>
@@ -76,14 +76,17 @@ export default {
     // 多个promise并行请求：使用Promise.all并行请求
     const [moviesCurrent, rankList] = await Promise.all(
       [fetchMovies({
-        type: 0,
-        limit: this.limit
+        type: 0
       }),
       fetchMovieRank({
         limit: 5
       })])
-    this.moviesCurrent = moviesCurrent
-    this.rankList = rankList
+    this.moviesCurrent = moviesCurrent.slice(0, 8)
+    this.rankList = rankList.slice(0, 5)
+    const likes = [313, 287, 165, 156, 99]
+    for (let i = 0; i < this.rankList.length; i++) {
+      this.rankList[i].likeCount = likes[i]
+    }
     this.loading = false
   },
   methods: {

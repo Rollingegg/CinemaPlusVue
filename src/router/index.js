@@ -79,17 +79,26 @@ const routes = [
       {
         path: 'user/tickets',
         component: () => import('@/views/user/TicketList'),
-        name: 'userTicket'
+        name: 'userTicket',
+        meta: {
+          title: '我的电影票'
+        }
       },
       {
         path: 'user/consumption',
         component: () => import('@/views/user/ConsumptionRecord'),
-        name: 'userConsumption'
+        name: 'userConsumption',
+        meta: {
+          title: '我的消费记录'
+        }
       },
       {
         path: 'user/coupons',
         component: () => import('@/views/user/CardPack'),
-        name: 'userCardPack'
+        name: 'userCardPack',
+        meta: {
+          title: '我的卡包'
+        }
       },
       {
         path: '/about',
