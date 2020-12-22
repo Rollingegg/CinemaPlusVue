@@ -62,7 +62,9 @@ module.exports = {
     name: name,
     resolve: {
       alias: {
-        '@': resolve('src')
+        '@': resolve('src'),
+        // 使全量引入icon指向自定义的icon列表
+        '@ant-design/icons/lib/dist$': path.resolve(__dirname, './src/icons/antdIcon.js')
       }
     }
   },
@@ -121,8 +123,7 @@ module.exports = {
             vuex: 'Vuex',
             'vue-router': 'VueRouter',
             axios: 'axios',
-            moment: 'moment',
-            mockjs: 'Mock'
+            moment: 'moment'
           })
           // 通过 html-webpack-plugin注入到 index.html之中
           config.plugin('html').tap(args => {
