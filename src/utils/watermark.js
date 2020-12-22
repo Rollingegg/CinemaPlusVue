@@ -11,24 +11,25 @@ const setWatermark = (str1, str2, targetId, isMobile) => {
   const can = document.createElement('canvas')
   // 设置canvas画布大小
   if (isMobile) {
-    can.width = 120
-    can.height = 65
+    can.width = 100
+    can.height = 52
   } else {
     can.width = 200
     can.height = 120
   }
   const cans = can.getContext('2d')
   cans.rotate(-35 * Math.PI / 180) // 水印旋转角度
-  if (isMobile) {
-    cans.font = '14px Vedana'
-  } else {
-    cans.font = '22px Vedana'
-  }
   cans.fillStyle = '#666666'
   cans.textAlign = 'center'
   cans.textBaseline = 'Middle'
-  cans.fillText(str1, can.width / 2, can.height) // 水印在画布的位置x，y轴
-  cans.fillText(str2, can.width / 2, can.height + 30)
+  if (isMobile) {
+    cans.font = '14px Vedana'
+    cans.fillText(str2, can.width / 2, can.height + 13)
+  } else {
+    cans.font = '22px Vedana'
+    cans.fillText(str2, can.width / 2, can.height + 30)
+  }
+  cans.fillText(str1, 0, can.height - 15) // 水印在画布的位置x，y轴
 
   const div = document.createElement('div')
   div.id = id
