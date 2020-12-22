@@ -52,6 +52,9 @@ BACKEND_REQUEST.interceptors.response.use(
     if (res.success) {
       return res.content
     }
+    if (res === 'index') {
+      return Promise.resolve()
+    }
     if (res.message !== '用户卡不存在') {
       message.error(res.message || '系统内部异常，请联系网站管理员')
     }

@@ -26,13 +26,15 @@
           </a-skeleton>
         </a-list-item>
       </a-list>
+      <p>没有更多了哦</p>
+      <p class="des">- 由Random Theatre提供信息展示服务 -</p>
     </div>
   </div>
 </template>
 <script>
 import { fetchConsumptions, fetchConsumptionDetail } from '@/api/consumption'
-import db from '@/utils/localstorage'
 import ConsumptionCard from '@/components/ConsumptionCard'
+import { mapState } from 'vuex'
 
 export default {
   name: 'ConsumptionRecord',
@@ -40,12 +42,15 @@ export default {
   data () {
     return {
       backIcon: <a-icon type="link"/>,
-      consumptionList: null,
+      consumptionList: [],
       loading: true,
-      consumptionDetail: null,
-      defaultActiveKey: ['1'],
-      defaultSelectedKeys: ['1']
+      consumptionDetail: null
     }
+  },
+  computed: {
+    ...mapState({
+      userId: state => state.user.id
+    })
   },
   async mounted () {
     await this.fetchAllConsumptions()
@@ -66,7 +71,7 @@ export default {
     async fetchAllConsumptions () {
       try {
         this.loading = true
-        this.consumptionList = await fetchConsumptions(db.get('USER_ID'))
+        this.consumptionList = await fetchConsumptions(this.userId)
         if (this.consumptionList === null) {
           this.$message.error('获取消费记录列表失败，请检查网络连接')
         } else if (this.consumptionList.length === 0) {
@@ -96,7 +101,7 @@ export default {
 @import "~@/assets/style/utils";
 
 .consumption-content {
-  padding: 20px 0px;
+  padding: 20px 0;
   display: flex;
   flex-direction: row;
   // border-radius: @base-interval;
@@ -106,8 +111,13 @@ export default {
 .consumption-list-container {
   //padding: 0px 0px 0px 100px;
   display: flex;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
   // border-radius: @base-interval;
   // border: 1px solid @base-border-color;
+}
+.des{
+  color: @text-color-secondary;
 }
 </style>

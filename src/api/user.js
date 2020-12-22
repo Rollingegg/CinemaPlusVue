@@ -7,7 +7,7 @@ export function login (loginForm) {
 }
 
 export function logout () {
-  return request.post('/api/user/logout')
+  return request.post('/logout')
 }
 
 export function checkUser (username) {

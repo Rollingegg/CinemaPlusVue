@@ -138,7 +138,7 @@ export default {
           scheduleId: scheduleId
         },
         params: {
-          title: this.movieInfo.title || ''
+          title: this.movieInfo.name || ''
         }
       })
     },

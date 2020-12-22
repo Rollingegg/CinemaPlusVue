@@ -193,7 +193,7 @@
 <script>
 import pageTitle from '@/directive/page-title'
 import { mapState } from 'vuex'
-import { completeTicket, fetchSeatInfoByScheduleIdAndUserId, lockSeat } from '@/api/movie'
+import { completeTicket, fetchMovieDetail, fetchSeatInfoByScheduleIdAndUserId, lockSeat } from '@/api/movie'
 import { fetchVipInfo } from '@/api/user'
 
 export default {
@@ -279,13 +279,14 @@ export default {
     async init () {
       const { scheduleItem, seats } = await fetchSeatInfoByScheduleIdAndUserId(this.scheduleId, this.userId)
       this.scheduleInfo = scheduleItem
-      this.scheduleInfo.url = 'https://p1.meituan.net/moviemachine/56d4089f70bce77395597e0b5b6ff3a12891795.jpg'
-      this.scheduleInfo.actors = '张三/李四/王五'
-      this.scheduleInfo.category = '悬疑/爱情'
-      this.scheduleInfo.length = 120
+      const movieInfo = await fetchMovieDetail(this.userId, this.movieId)
+      this.scheduleInfo.url = movieInfo.posterUrl
+      this.scheduleInfo.actors = movieInfo.starring
+      this.scheduleInfo.category = movieInfo.type
+      this.scheduleInfo.length = movieInfo.length
       this.seatInfo = seats
       console.log(scheduleItem, seats)
-      document.title = this.scheduleInfo.movieName
+      // document.title = this.scheduleInfo.movieName
       this.selectedSeats = []
       for (let i = 0; i < seats.length; i++) {
         for (let j = 0; j < seats[0].length; j++) {
@@ -417,6 +418,7 @@ export default {
 
 <style scoped lang="less">
 @import "~@/assets/style/variables";
+@import "~@/assets/style/utils";
 
 .step-content {
   margin-top: @base-interval;
