@@ -15,7 +15,6 @@
         :pageSize="pageSize"
         :total="ticketsList.length"
         show-size-changer
-        @showSizeChange="onShowSizeChange"
       />
     </div>
   </div>
@@ -64,9 +63,6 @@ export default {
     }
   },
   methods: {
-    onShowSizeChange (current, pageSize) {
-      this.pageSize = pageSize
-    },
     ifNoUseTicket (ticket) {
       return ticket.state === '已失效' || new Date(ticket.schedule.endTime) < Date.now()
     }

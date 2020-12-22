@@ -1,6 +1,6 @@
 <template>
   <div :id="idProp.concat(this.ticket.id)">
-    <div class="ticket-card" :class="ifNoUseTicketClass" >
+    <div class="ticket-card" :class="ifNoUseTicketClass">
       <div class="ticket-card-poster-wrapper">
         <img v-lazy="ticket.movie.posterUrl" :alt="ticket.movie.name"/>
       </div>
@@ -27,6 +27,88 @@
         <div class="ticket-card-info-item">影厅：<span>{{ ticket.schedule.hallName }}</span></div>
         <div class="ticket-card-info-item">座位：<span>{{ ticket.seatsStr.replace(/\s+/g, ", ") }}</span></div>
       </div>
+
+      <div class="ticket-card-button">
+        <a-button shape="round"
+                  type='primary'
+                  :size="isMobile?'default':'large'"
+                  @click="() => (this.modalVisible = true)">
+          查看完整信息
+        </a-button>
+      </div>
+
+      <a-modal
+        v-model="modalVisible"
+        title="电影票信息详情"
+        centered
+        :footer="null"
+        @ok="() => (this.modalVisible = false)">
+        <a-collapse activeKey="1">
+          <a-collapse-panel key="1" header="票详细信息">
+            <a-descriptions
+              bordered>
+              <a-descriptions-item label="电影名">
+                {{ ticket.movie.name }}
+              </a-descriptions-item>
+              <a-descriptions-item label="购票时间">
+                {{ ticket.time }}
+              </a-descriptions-item>
+              <a-descriptions-item label="状态">
+                {{ this.ifNoUseTicketClass.noUseTicketClass ? '已失效' : '有 效' }}
+              </a-descriptions-item>
+              <a-descriptions-item label="座位">
+                <span v-html="this.replaceStr(ticket.seatsStr)"/>
+              </a-descriptions-item>
+            </a-descriptions>
+          </a-collapse-panel>
+          <a-collapse-panel key="2" header="排片详细信息">
+            <a-descriptions
+              bordered>
+              <a-descriptions-item label="电影名">
+                {{ ticket.schedule.movieName }}
+              </a-descriptions-item>
+              <a-descriptions-item label="影厅">
+                {{ ticket.schedule.hallName }}
+              </a-descriptions-item>
+              <a-descriptions-item label="票价">
+                ￥{{ ticket.schedule.fare }}
+              </a-descriptions-item>
+              <a-descriptions-item label="开始时间">
+                {{ ticket.schedule.startTime }}
+              </a-descriptions-item>
+              <a-descriptions-item label="预计结束时间">
+                {{ ticket.schedule.endTime }}
+              </a-descriptions-item>
+            </a-descriptions>
+          </a-collapse-panel>
+          <a-collapse-panel key="3" header="电影详细信息">
+            <a-descriptions
+              bordered>
+              <a-descriptions-item label="电影名">
+                {{ ticket.movie.name }}
+              </a-descriptions-item>
+              <a-descriptions-item label="喜欢人数">
+                {{ ticket.movie.likeCount === null ? "暂无" : ticket.movie.likeCount }}
+              </a-descriptions-item>
+              <a-descriptions-item label="导演">
+                {{ ticket.movie.director }}
+              </a-descriptions-item>
+              <a-descriptions-item label="演员">
+                {{ ticket.movie.starring }}
+              </a-descriptions-item>
+              <a-descriptions-item label="类型">
+                {{ ticket.movie.type }}
+              </a-descriptions-item>
+              <a-descriptions-item label="国家">
+                {{ ticket.movie.country === null ? "暂无" : ticket.movie.country }}
+              </a-descriptions-item>
+              <a-descriptions-item label="描述" :span="3">
+                {{ ticket.movie.description }}
+              </a-descriptions-item>
+            </a-descriptions>
+          </a-collapse-panel>
+        </a-collapse>
+      </a-modal>
     </div>
   </div>
 </template>
@@ -37,7 +119,9 @@ import { removeWatermark, setWaterMark } from '@/utils/watermark'
 export default {
   name: 'TicketCard',
   data: function () {
-    return {}
+    return {
+      modalVisible: false
+    }
   },
   props: {
     ticket: {
@@ -52,16 +136,16 @@ export default {
       setWaterMark('已失效', '无效票', this.idProp + this.ticket.id, this.isMobile)
     }
   },
+  methods: {
+    replaceStr (seats) {
+      return seats.replace(/\s+/g, '<br />')
+    }
+  },
   destroyed () {
     window.onresize = null
     if (this.ifNoUseTicketClass.noUseTicketClass) {
       removeWatermark(this.idProp + this.ticket.id)
     }
-  },
-  watch: {
-    /*    waterMarkOpacity (newValue, oldValue) {
-      console.log('props', newValue)
-    } */
   },
   computed: {
     isMobile () {
@@ -196,6 +280,13 @@ export default {
       }
 
       .textOverflow()
+    }
+  }
+
+  &-button {
+    padding-right: @base-interval;
+    @media (max-width: @mobile-screen-width) {
+      padding-right: 0;
     }
   }
 }

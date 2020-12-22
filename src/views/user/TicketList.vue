@@ -6,7 +6,6 @@
       @back="() => null"
       :backIcon="backIcon"
     />
-
     <a-tabs :default-active-key="defaultActive"
             size="large"
             :tabBarGutter="15"
@@ -32,7 +31,6 @@
                            :loading="loading"/>
       </a-tab-pane>
     </a-tabs>
-
     <a-back-top/>
   </div>
 </template>
@@ -81,7 +79,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-
-</style>
