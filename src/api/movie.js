@@ -13,6 +13,10 @@ export function fetchMovieRank (param) {
   return request.get('/api/movies/rank', param)
 }
 
+export function getAllMoviesExcludeOff (param) {
+  return request.get('/movie/all/exclude/off', param)
+}
+
 export function fetchScheduleDataByMovieId (movieId) {
   return request.get(`${domain}/schedule/search/audience`, {
     movieId: movieId
