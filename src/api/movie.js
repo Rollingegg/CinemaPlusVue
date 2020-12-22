@@ -24,6 +24,10 @@ export function updateMovieLike (userId, movieId, isLike) {
   return request.post(`${domain}/movie/${movieId}/like/?userId=${userId}`)
 }
 
+export function getAllMoviesExcludeOff (param) {
+  return request.get('/movie/all/exclude/off', param)
+}
+
 export function fetchScheduleDataByMovieId (movieId) {
   return request.get(`${domain}/schedule/search/audience`, {
     movieId: movieId
