@@ -1,34 +1,39 @@
 <template>
-  <div class="ticket-card" :class="ifNoUseTicketClass">
-    <div class="ticket-card-poster-wrapper">
-      <img v-lazy="ticket.movie.posterUrl" :alt="ticket.movie.name"/>
-    </div>
+  <div :id="idProp.concat(this.ticket.id)">
+    <div class="ticket-card" :class="ifNoUseTicketClass" >
+      <div class="ticket-card-poster-wrapper">
+        <img v-lazy="ticket.movie.posterUrl" :alt="ticket.movie.name"/>
+      </div>
 
-    <div class="ticket-card-info">
-      <div class="ticket-card-info-title">
-        <div>
-          <div class="ticket-title">{{ ticket.movie.name }}</div>
-          <div v-if="!isMobile">
-            <a-tag v-if="ticket.movie.status===1" color="rgba(0, 0, 0, 0.25)">已下架</a-tag>
-            <a-tag v-else color="#f5222d">热映中</a-tag>
+      <div class="ticket-card-info">
+        <div class="ticket-card-info-title">
+          <div>
+            <div class="ticket-title">{{ ticket.movie.name }}</div>
+            <div v-if="!isMobile">
+              <a-tag v-if="ticket.movie.status===1" color="rgba(0, 0, 0, 0.25)">已下架</a-tag>
+              <a-tag v-else color="#f5222d">热映中</a-tag>
+            </div>
           </div>
         </div>
+        <div class="ticket-card-info-description" v-if="!isMobile">
+          {{ ticket.movie.description }}
+        </div>
+        <div class="ticket-card-info-item">单价：<span>￥{{ ticket.schedule.fare }}</span></div>
+        <div class="ticket-card-info-item">购票时间：<span>{{ ticket.time }}</span></div>
+        <div class="ticket-card-info-item">观影日期：<span>{{ ticket.schedule.startTime.substring(0, 10) }}</span></div>
+        <div class="ticket-card-info-item">预计时间日期：<span>从 {{
+            ticket.schedule.startTime.substring(11)
+          }} 到 {{ ticket.schedule.endTime.substring(11) }}</span></div>
+        <div class="ticket-card-info-item">影厅：<span>{{ ticket.schedule.hallName }}</span></div>
+        <div class="ticket-card-info-item">座位：<span>{{ ticket.seatsStr.replace(/\s+/g, ", ") }}</span></div>
       </div>
-      <div class="ticket-card-info-description" v-if="!isMobile">
-        {{ ticket.movie.description }}
-      </div>
-      <div class="ticket-card-info-item">单价：<span>￥{{ ticket.schedule.fare }}</span></div>
-      <div class="ticket-card-info-item">购票时间：<span>{{ ticket.time }}</span></div>
-      <div class="ticket-card-info-item">观影日期：<span>{{ ticket.schedule.startTime.substring(0, 10) }}，从 {{
-          ticket.schedule.startTime.substring(11)
-        }} 到 {{ ticket.schedule.endTime.substring(11) }}</span></div>
-      <div class="ticket-card-info-item">影厅：<span>{{ ticket.schedule.hallName }}</span></div>
-      <div class="ticket-card-info-item">座位：<span>{{ ticket.seatsStr.replace(/\s+/g, ", ") }}</span></div>
     </div>
   </div>
 </template>
 
 <script>
+import { removeWatermark, setWaterMark } from '@/utils/watermark'
+
 export default {
   name: 'TicketCard',
   data: function () {
@@ -37,7 +42,26 @@ export default {
   props: {
     ticket: {
       type: Object
+    },
+    idProp: {
+      type: String
     }
+  },
+  mounted () {
+    if (this.ifNoUseTicketClass.noUseTicketClass) {
+      setWaterMark('已失效', '无效票', this.idProp + this.ticket.id, this.isMobile)
+    }
+  },
+  destroyed () {
+    window.onresize = null
+    if (this.ifNoUseTicketClass.noUseTicketClass) {
+      removeWatermark(this.idProp + this.ticket.id)
+    }
+  },
+  watch: {
+    /*    waterMarkOpacity (newValue, oldValue) {
+      console.log('props', newValue)
+    } */
   },
   computed: {
     isMobile () {
@@ -57,11 +81,10 @@ export default {
 @import "~@/assets/style/utils";
 
 .noUseTicketClass {
-  -webkit-filter: blur(1px) grayscale(.95) opacity(95%);
+  -webkit-filter: blur(0.75px) grayscale(.25) opacity(80%);
 }
 
 .ticket-card {
-
   display: flex;
   border-radius: @base-interval;
   border: 1px solid @base-border-color;
@@ -155,12 +178,11 @@ export default {
       @media (max-width: @mobile-screen-width) {
         font-size: @base-font-size;
       }
-      .textOverflowMulti()
+      .textOverflowMulti(2)
     }
 
     &-item {
-
-      padding-top: calc(@base-interval / 2);
+      padding-top: calc(@base-interval / 5);
       white-space: nowrap;
       overflow: hidden;
       font-size: @movie-info-item-font-size;

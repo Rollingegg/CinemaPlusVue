@@ -3,7 +3,7 @@
     <a-skeleton :loading="loading" active>
       <ul>
         <li v-for="(ticket,index) in ticketsList.slice((current-1)*pageSize,current*pageSize)" :key="index">
-          <ticket-card :ticket="ticket"/>
+          <ticket-card :ticket="ticket" :idProp="idProp"/>
         </li>
       </ul>
     </a-skeleton>
@@ -22,7 +22,9 @@
 </template>
 
 <script>
+import { removeWatermark, setWaterMark } from '@/utils/watermark'
 import TicketCard from './TicketCard'
+
 export default {
   name: 'TicketsContainer',
   props: {
@@ -31,6 +33,12 @@ export default {
     },
     loading: {
       type: Boolean
+    },
+    idProp: {
+      type: String
+    },
+    waterMarkOpacity: {
+      type: Number
     }
   },
   components: {
@@ -43,13 +51,29 @@ export default {
     }
   },
   watch: {
-    current (val) {
-      console.log('current', val)
+    waterMarkOpacity (newValue) {
+      if (newValue === 0) {
+        this.ticketsList.filter(t => this.ifNoUseTicket(t))
+          .map(t => this.idProp.concat(t.id))
+          .forEach(id => removeWatermark(id))
+      } else {
+        this.ticketsList.filter(t => this.ifNoUseTicket(t))
+          .map(t => this.idProp.concat(t.id))
+          .forEach(id => setWaterMark('已失效', '无效票', id, this.isMobile))
+      }
     }
   },
   methods: {
     onShowSizeChange (current, pageSize) {
       this.pageSize = pageSize
+    },
+    ifNoUseTicket (ticket) {
+      return ticket.state === '已失效' || new Date(ticket.schedule.endTime) < Date.now()
+    }
+  },
+  computed: {
+    isMobile () {
+      return this.$store.state.device === 'mobile'
     }
   }
 }
