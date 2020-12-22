@@ -14,6 +14,12 @@ export {
 export {
   default as LinkOutline
 } from '@ant-design/icons/lib/outline/LinkOutline'
+export {
+  default as LeftCircleOutline
+} from '@ant-design/icons/lib/outline/LeftCircleOutline'
+export {
+  default as RightCircleOutline
+} from '@ant-design/icons/lib/outline/RightCircleOutline'
 
 // export what antd other components need
 export {

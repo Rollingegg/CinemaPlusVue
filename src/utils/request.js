@@ -94,9 +94,8 @@ const request = {
   get (url, params) {
     return BACKEND_REQUEST.get(param2urlencoded(url, params))
   },
-  post (url, params) {
+  post (url, params, useFormPost = false) {
     // 是否使用原生表单提交，对应springboot后端为不加@RequestBody注解的入参
-    const useFormPost = false
     if (useFormPost) {
       return BACKEND_REQUEST.post(url, params, {
         transformRequest: [(params) => {
