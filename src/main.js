@@ -6,6 +6,7 @@ import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.less'
 import VueLazyload from 'vue-lazyload'
 import moment from 'moment'
+import './icons' // icon
 
 if (process.env.VUE_APP_MOCK === 'true') {
   // 由于是异步mock，导致某些接口在mounted调用时，mock还没好，出现ECONNREFUSED错误

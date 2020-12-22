@@ -19,18 +19,18 @@
               银幕
             </h3>
             <a-space>
-              <div><seat-icon/>可选</div>
-              <div><seat-icon class="seat-lock"/>已售</div>
-              <div><seat-icon class="seat-choose"/>选中</div>
+              <div><svg-icon icon-class="seat"/>可选</div>
+              <div><svg-icon icon-class="seat" class-name="seat-lock"/>已售</div>
+              <div><svg-icon icon-class="seat" class-name="seat-choose"/>选中</div>
             </a-space>
           </div>
           <div class="seat-wrapper">
             <div v-for="(col,i) in seatInfo" :key="i">
-              <seat-icon v-for="(status,j) in col"
-                         :key="j"
-                         @click.native="selectSeat(i,j)"
-                         class="seat"
-                         :class="seatClassObject(i,j)"/>
+              <svg-icon icon-class="seat"
+                        v-for="(status,j) in col" :key="j"
+                        @click.native="selectSeat(i,j)"
+                        class-name="seat"
+                        :class="seatClassObject(i,j)"/>
             </div>
           </div>
           <a-divider dashed v-if="isMobile"/>
@@ -193,13 +193,11 @@
 <script>
 import pageTitle from '@/directive/page-title'
 import { mapState } from 'vuex'
-import SeatIcon from '@/components/icon/SeatIcon'
 import { completeTicket, fetchSeatInfoByScheduleIdAndUserId, lockSeat } from '@/api/movie'
 import { fetchVipInfo } from '@/api/user'
 
 export default {
   name: 'MovieBuy',
-  components: { SeatIcon },
   data () {
     return {
       currentStep: 0,

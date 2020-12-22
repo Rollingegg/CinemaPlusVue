@@ -81,15 +81,22 @@ module.exports = {
     // when there are many pages, it will cause too many meaningless requests
     config.plugins.delete('prefetch')
 
-    // use svg-icon
-    const svgRule = config.module.rule('svg')
-    svgRule.uses.clear()
-    svgRule
-      .use('babel-loader')
-      .loader('babel-loader')
+    // use svg-sprite-loader
+    config.module
+      .rule('svg')
+      .exclude.add(resolve('src/icons'))
       .end()
-      .use('vue-svg-loader')
-      .loader('vue-svg-loader')
+    config.module
+      .rule('icons')
+      .test(/\.svg$/)
+      .include.add(resolve('src/icons'))
+      .end()
+      .use('svg-sprite-loader')
+      .loader('svg-sprite-loader')
+      .options({
+        symbolId: 'icon-[name]'
+      })
+      .end()
 
     config
       .when(process.env.NODE_ENV !== 'development',
@@ -103,8 +110,7 @@ module.exports = {
               'https://cdn.bootcss.com/vuex/3.5.1/vuex.min.js',
               'https://cdn.bootcss.com/vue-router/3.4.9/vue-router.min.js',
               'https://cdn.bootcss.com/axios/0.21.0/axios.min.js',
-              'http://cdn.staticfile.org/moment.js/2.29.1/moment.min.js',
-              'https://unpkg.com/vue-lazyload/vue-lazyload.js'
+              'http://cdn.staticfile.org/moment.js/2.29.1/moment.min.js'
             ]
           }
           // 配置cdn依赖
