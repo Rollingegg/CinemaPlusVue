@@ -85,12 +85,45 @@ module.exports = {
     const svgRule = config.module.rule('svg')
     svgRule.uses.clear()
     svgRule
+      .use('babel-loader')
+      .loader('babel-loader')
+      .end()
       .use('vue-svg-loader')
       .loader('vue-svg-loader')
 
     config
       .when(process.env.NODE_ENV !== 'development',
         config => {
+          // 经测试，通过cdn打包后约莫能减少400K的体积
+          // 配置第三方资源的cdn
+          const cdn = {
+            js: [
+              // vue必须在第一个
+              'https://cdn.bootcss.com/vue/2.6.10/vue.min.js',
+              'https://cdn.bootcss.com/vuex/3.5.1/vuex.min.js',
+              'https://cdn.bootcss.com/vue-router/3.4.9/vue-router.min.js',
+              'https://cdn.bootcss.com/axios/0.21.0/axios.min.js',
+              'http://cdn.staticfile.org/moment.js/2.29.1/moment.min.js',
+              'https://unpkg.com/vue-lazyload/vue-lazyload.js'
+            ]
+          }
+          // 配置cdn依赖
+          // 格式为 'aaa' : 'bbb', 其中，aaa表示要引入的资源的名字，bbb表示该模块提供给外部引用的名字，由对应的库自定。
+          // 例如，vue为Vue，vue-router为VueRouter.
+          config.set('externals', {
+            vue: 'Vue',
+            vuex: 'Vuex',
+            'vue-router': 'VueRouter',
+            axios: 'axios',
+            moment: 'moment',
+            mockjs: 'Mock'
+          })
+          // 通过 html-webpack-plugin注入到 index.html之中
+          config.plugin('html').tap(args => {
+            args[0].cdn = cdn
+            return args
+          })
+
           config
             .plugin('ScriptExtHtmlWebpackPlugin')
             .after('html')
@@ -123,7 +156,7 @@ module.exports = {
                   chunks: 'initial' // only package third parties that are initially dependent
                 },
                 antd: {
-                  name: 'chunk-antd', // split elementUI into a single package
+                  name: 'chunk-antd', // split ant-design-vue into a single package
                   priority: 20, // the weight needs to be larger than libs and app or it will be packaged into libs or app
                   test: /[\\/]node_modules[\\/]_?ant-design(.*)/ // in order to adapt to cnpm
                 },
