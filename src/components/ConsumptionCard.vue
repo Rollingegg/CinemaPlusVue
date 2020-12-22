@@ -23,6 +23,7 @@
 </template>
 <script>
 import { formatDate } from '@/utils/format-date'
+
 export default {
   name: 'ConsumptionCard',
   computed: {
@@ -33,8 +34,7 @@ export default {
   },
   filters: {
     dateFormat (time) {
-      const result = formatDate(new Date(time), 'yyyy-MM-dd hh:mm:ss')
-      return result
+      return formatDate(new Date(time), 'yyyy-MM-dd hh:mm:ss')
     }
   }
 }
@@ -43,7 +43,7 @@ export default {
 @import "~@/assets/style/variables";
 @import "~@/assets/style/utils";
 .consumption-card {
-  padding: 20px 0px;
+  padding: 20px 0;
   display: flex;
   // border-radius: @base-interval;
   // border: 1px solid @base-border-color;
@@ -63,7 +63,7 @@ export default {
     height: @consumption-card-height;
     width: @consumption-card-height;
     img {
-      border-radius: @consumption-card-pic-interval @consumption-card-pic-interval @consumption-card-pic-interval @consumption-card-pic-interval;
+      border-radius: @consumption-card-pic-interval;
       height: 100%;
       width: 100%;
 
@@ -72,7 +72,7 @@ export default {
 
   &-info {
     height: @consumption-card-height;
-    margin: 0px 50px 0px 0px;
+    margin: 0 50px 0 0;
     &-box {
       flex-direction: column;
       overflow: hidden;
@@ -83,13 +83,13 @@ export default {
 
 .consumption-title{
   font-size: 16px;
-  margin: 5px 0px 5px 15px;
+  margin: 5px 0 5px 15px;
   color: #222222;
 }
 
 .consumption-info{
   font-size: 12px;
-  margin: 0px 0px 0px 15px;
+  margin: 0 0 0 15px;
   color: #666666;
 }
 .consumption-afford-box{
@@ -100,9 +100,8 @@ export default {
 
 .consumption-price{
   font-size: 14px;
-  margin: 0px 10px 0px 0px;
+  margin: 0 10px 0 0;
   //width: 300px;
-  margin-bottom: 0px;
 }
 .consumption-price-box{
   display: flex;
