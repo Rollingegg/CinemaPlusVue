@@ -131,7 +131,7 @@ export default {
       this.rankList[i].likeCount = likes[i]
     }
     this.loading = false
-    const rankFirst = await fetchMovieDetail(this.userId, rankList[0].movieId)
+    const rankFirst = await fetchMovieDetail(this.userId || 0, rankList[0].movieId)
     this.$set(this.rankList[0], 'posterUrl', rankFirst.posterUrl)
     this.$set(this.rankList[0], 'likeCount', rankFirst.likeCount)
   },
