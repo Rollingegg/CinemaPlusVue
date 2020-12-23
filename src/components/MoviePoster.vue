@@ -7,7 +7,7 @@
           <div class="movie-title" :title="movieName">{{movieName}}</div>
           <div class="movie-rate">
             <i class="movie-rate-int">{{String(rate).substr(0,1)}}.</i>
-            <i class="movie-rate-frac">{{String(rate).substr(2)}}</i>
+            <i class="movie-rate-frac">{{String(rate).substr(2)||0}}</i>
           </div>
         </div>
       </div>

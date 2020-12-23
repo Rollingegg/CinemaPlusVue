@@ -43,26 +43,43 @@
             <div class="section-title">今日票房</div>
           </div>
           <a-list v-if="!loading" :data-source="rankList.slice(1)" class="movies-rank-container">
-            <router-link :to="`/movies/${rankList[0].id}`" slot="header" class="rank-first">
-              <i class="rank-first-icon"></i>
+            <router-link :to="`/movies/${rankList[0].movieId}`" slot="header" class="rank-first">
+              <i class="rank-first-icon rank-first-icon-champion"></i>
               <img :src="rankList[0].posterUrl" alt="movie-poster" class="rank-first-movie"/>
               <div class="rank-first-info">
                 <h3>{{ rankList[0].name }}</h3>
-                <a-statistic :value="rankList[0].likeCount" :value-style="{color: '#0063B1'}"></a-statistic>
+                <a-statistic :value="rankList[0].boxOffice||0" suffix="万" :value-style="{color: '#0063B1'}" title="票房总额"></a-statistic>
               </div>
             </router-link>
             <a-list-item slot="renderItem" slot-scope="item,index" class="rank-item">
-              <router-link :to="`/movies/${item.id}`" class="rank-item-normal">
+              <router-link :to="`/movies/${item.movieId}`" class="rank-item-normal">
                 <div class="movie-rank-title">
                   <i :style="{color: getRankColor(index),fontSize: '24px',marginRight: '20px'}">{{
                       index + 2
                     }}</i>{{ item.name }}
                 </div>
-                <a-statistic :value="item.likeCount" :value-style="{color: '#0063B1'}"></a-statistic>
+                <a-statistic :value="item.boxOffice||0" :value-style="{color: '#0063B1'}"></a-statistic>
               </router-link>
               <a-skeleton :loading="loading" active/>
             </a-list-item>
           </a-list>
+        </section>
+        <section class="movies-overview-container">
+          <div class="movies-overview-container-title">
+            <div class="section-title">最受欢迎</div>
+          </div>
+          <router-link :to="`/movies/${rankList[0].movieId}`" slot="header" class="rank-first">
+            <i class="rank-first-icon rank-first-icon-hottest"></i>
+            <img :src="rankList[0].posterUrl" alt="movie-poster" class="rank-first-movie"/>
+            <div class="rank-first-info">
+              <h3>{{ rankList[0].name }}</h3>
+              <a-statistic :value="rankList[0].likeCount||0" :value-style="{color: '#0063B1'}" title="想看人数">
+                <template #suffix>
+                  <a-icon type="heart" theme="filled" style="color: #f5222d" />
+                </template>
+              </a-statistic>
+            </div>
+          </router-link>
         </section>
       </a-col>
     </a-row>
@@ -71,7 +88,7 @@
 
 <script>
 import MoviePoster from '@/components/MoviePoster'
-import { fetchMovieRank, fetchMovies } from '@/api/movie'
+import { fetchMovieDetail, fetchMovieRank, fetchMovies } from '@/api/movie'
 import { mapState } from 'vuex'
 
 export default {
@@ -90,7 +107,8 @@ export default {
   computed: {
     ...mapState({
       vipInfoList: state => state.user.vipCardInfoList,
-      isVip: state => state.user.isVip
+      isVip: state => state.user.isVip,
+      userId: state => state.user.id
     }),
     isMobile () {
       return this.$store.state.device === 'mobile'
@@ -113,6 +131,9 @@ export default {
       this.rankList[i].likeCount = likes[i]
     }
     this.loading = false
+    const rankFirst = await fetchMovieDetail(this.userId, rankList[0].movieId)
+    this.$set(this.rankList[0], 'posterUrl', rankFirst.posterUrl)
+    this.$set(this.rankList[0], 'likeCount', rankFirst.likeCount)
   },
   methods: {
     onChange (a, b, c) {
@@ -251,44 +272,51 @@ export default {
         }
       }
 
-      .rank-first {
-        height: @movie-rank-first-height;
-        display: flex;
-        align-items: center;
-        // 为了对齐：20px - 12px(ant-list-header:padding-top)
-        margin: 8px 0 -12px 0;
+    }
+  }
+}
+.rank-first {
+  position: relative;
+  height: @movie-rank-first-height;
+  display: flex;
+  align-items: center;
+  // 为了对齐：20px - 12px(ant-list-header:padding-top)
+  margin: 8px 0 -12px 0;
 
-        &:hover {
-          background-color: @hover-background-color;
-        }
+  &:hover {
+    background-color: @hover-background-color;
+  }
 
-        &-icon {
-          display: inline-block;
-          position: absolute;
-          left: 0;
-          // 对齐上部
-          top: @base-interval;
-          width: 22px;
-          height: 25px;
-          background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAaCAYAAACzdqxAAAAABmJLR0QA/wD/AP+gvaeTAAAC4ElEQVRIx92VTYscVRSGn1P39qS6E7vbEZ1ROjMxaTMoImHETIQoRHAjbrIw4HYWwa2/wJ+QVUAkiDshwiyMDEgkYVT8jE0WYcJAhCQ9JKOmp6e/UlXdde/JotXY89GtkSz0QEFRdc9zTr3vPXWl/toR5SFE8DCg/02w3fxAvUeNQa0FZES6ImmKOIcEwc5g9R7dd4DsW29jpqaRbHY4NopwN28QffIxXP95AH7/ThUNQ3LzJ8E5kqWL2NIUmQPPbHvZ0hTJ0kVwjtz8STQMQXUbMECYw0xMEp9bwK/dAhkihQh+7RbxuQXMxCSEuSHmpT200yGYfApNEvB+Z7D3aJL013Y6kPZ2AIsg7RbJ0gXC4ycw+8tor7uzvr0uZn+Z8PgJkqULSLs18IUD5okIvcVP0W5CZvYwrlolODgDdtPmSVNctYotHyQ5v0j6xecEm2STLSOtincOtRmkUCQ7/w7ZN96EPxz3nmjxM6IP30cbG0jaIzBmix9bB0SEwFoMSlC/Q3TmNEnl0p+vk8olojOnCep3+mus3dbk4ZMXGKReI144i8YxGsfEC2eReg0CMzTVMiLEWNzKMn69BoBbWSYwI9NGg/Eebbdwa7f7FrRb/W1o/kXHCuj009jyDEGh2E84egx3bQVZvTn0TzK8YxEkl0OjDp2PPugXcw7J5fqGqT4YWFTRq1dQ1fsM+b3gCJ3/lnkPEv+DE+SvoeBT1Wbi9EbTpZcB8sYe2mVk2orkZUhjW8BONeqq/tJx/sp6r1dZjbs//NRsL39db/4KcPTR/BMv5vc8VwrHDo9nMrO7TfD8mMiEERk4bqR2bC5JlUbk/bVGmlZ+66Y/Xu3cvVxptqvnaxsbpXCX/26jOVD8SDHPapwErz9WLM7m9+x9dnfu0ONj9qWCtbPZIChboSDfzL3wXjXufv9to7Xy1Xrz9qvjhfjU9dV/pOe7+0p8ud4IXxnPP/ly4ZGZveHY3D3KzjdbTNAgKwAAAABJRU5ErkJggg==) no-repeat;
-          background-size: contain;
-        }
+  &-icon {
+    display: inline-block;
+    position: absolute;
+    left: 0;
+    // 对齐上部
+    top: 0;
+    width: 22px;
+    height: 25px;
+    background-size: contain;
+  }
 
-        &-movie {
-          height: 100%;
-          width: @movie-rank-first-width;
-        }
+  &-icon-champion{
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAaCAYAAACzdqxAAAAABmJLR0QA/wD/AP+gvaeTAAAC4ElEQVRIx92VTYscVRSGn1P39qS6E7vbEZ1ROjMxaTMoImHETIQoRHAjbrIw4HYWwa2/wJ+QVUAkiDshwiyMDEgkYVT8jE0WYcJAhCQ9JKOmp6e/UlXdde/JotXY89GtkSz0QEFRdc9zTr3vPXWl/toR5SFE8DCg/02w3fxAvUeNQa0FZES6ImmKOIcEwc5g9R7dd4DsW29jpqaRbHY4NopwN28QffIxXP95AH7/ThUNQ3LzJ8E5kqWL2NIUmQPPbHvZ0hTJ0kVwjtz8STQMQXUbMECYw0xMEp9bwK/dAhkihQh+7RbxuQXMxCSEuSHmpT200yGYfApNEvB+Z7D3aJL013Y6kPZ2AIsg7RbJ0gXC4ycw+8tor7uzvr0uZn+Z8PgJkqULSLs18IUD5okIvcVP0W5CZvYwrlolODgDdtPmSVNctYotHyQ5v0j6xecEm2STLSOtincOtRmkUCQ7/w7ZN96EPxz3nmjxM6IP30cbG0jaIzBmix9bB0SEwFoMSlC/Q3TmNEnl0p+vk8olojOnCep3+mus3dbk4ZMXGKReI144i8YxGsfEC2eReg0CMzTVMiLEWNzKMn69BoBbWSYwI9NGg/Eebbdwa7f7FrRb/W1o/kXHCuj009jyDEGh2E84egx3bQVZvTn0TzK8YxEkl0OjDp2PPugXcw7J5fqGqT4YWFTRq1dQ1fsM+b3gCJ3/lnkPEv+DE+SvoeBT1Wbi9EbTpZcB8sYe2mVk2orkZUhjW8BONeqq/tJx/sp6r1dZjbs//NRsL39db/4KcPTR/BMv5vc8VwrHDo9nMrO7TfD8mMiEERk4bqR2bC5JlUbk/bVGmlZ+66Y/Xu3cvVxptqvnaxsbpXCX/26jOVD8SDHPapwErz9WLM7m9+x9dnfu0ONj9qWCtbPZIChboSDfzL3wXjXufv9to7Xy1Xrz9qvjhfjU9dV/pOe7+0p8ud4IXxnPP/ly4ZGZveHY3D3KzjdbTNAgKwAAAABJRU5ErkJggg==) no-repeat;
+  }
+  &-icon-hottest{
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAaCAYAAACzdqxAAAAABmJLR0QA/wD/AP+gvaeTAAACkElEQVRIx92Vz29MURTHP+feN50ZU+1UaUW0NKHaaqRBGyoREhtpYiFs7PwBiIUFCxYkjT0bCxJbS4SFiFggFUykaASlaIJK2+lMf82791gQNTrTThddcBYveefe87nf9z0n74reEGURwiwG9D8Ge7WEGkcX0I0SwIqLNKDNF8lV7cNpGTD/CfOCVUETjQT1B4hsvYyrP0HoK+aFB/Op9USR2i4kUg5ApOUUORMl7O8mMOOALFyx94Kr6iKoO/g7J0GcSONR/MpDeF+83BSHKrnEDuzGs0hsed6alFVg1x8njG6gWEcLg1UJo03Y1vPYZEvBLbayGWr347VkKxRHHGk4RlDT+Ufak9cwEUzNLrxJUqiRBRV7uwxbu3vmfayf3OAd8C6/uHwtahML8Vh+L2kuw/SLc2jmDZi/hshE0CKIgllxI7jhZz/VDqeQoduIKZv9ZWPvMD5TKliwZND3l/DZz+jEIMYNw+RAfiem0/iBq1g3TKFZLqxYhCB9jzB1BJd+jbEWHbqLG3sH6vDpt+R6T2O+XkNM4XGTuX703gteKrCSRVUJE+0QW41k+7ATrzDGFSudG/x3qCooiPDrUTyC0pAzFiGl7f33bpA5rVDFh07Skzn9MJo1KYDKhG+LRWRNYLVCpLiwWWDnmZjOyZfMpPR+H+PJp+/y+FGff3knZb4B7GnTFduaTMvqam2vXsqW8pi2lkW01hrif3LEXZep0DE6PmXejGT16dcRHj/vN6me13y89TQ6Urfc+YevJvMO394c4+OQNXs3TyU7Gqnb1ODbapK0JxOyeUnUrwsslfL8gj0z8E16HvTRd783GOzqcFMnrwTARIluxuk+HHKzx0Z3toarOptoql+hHT8AQHUD1vWbGWEAAAAASUVORK5CYII=);
+  }
+  &-movie {
+    height: 100%;
+    width: @movie-rank-first-width;
+  }
 
-        &-info {
-          padding-left: @base-interval;
-          display: flex;
-          flex-direction: column;
+  &-info {
+    padding-left: @base-interval;
+    display: flex;
+    flex-direction: column;
 
-          h3 {
-            font-size: @movie-title-font-size;
-          }
-        }
-      }
+    h3 {
+      font-size: @movie-title-font-size;
+      .textOverflowMulti(2)
     }
   }
 }

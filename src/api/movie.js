@@ -20,7 +20,7 @@ export function fetchMovies (param) {
 }
 
 export function fetchMovieRank (param) {
-  return request.get('/movie/all/exclude/off')
+  return request.get('/statistics/boxOffice/total')
 }
 
 export function fetchMovieDetail (userId, movieId) {

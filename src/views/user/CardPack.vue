@@ -15,7 +15,7 @@
           <div class="no-card">
             <img src="@/assets/img/no-card.png" alt="暂无会员卡">
             <div style="margin-bottom: 20px">暂无影城会员卡</div>
-            <a-button type="danger" :block="isMobile" @click="startBuyVip">立即开通</a-button>
+            <a-button type="danger" :block="isMobile" @click="startBuyVip"><a-icon type="plus-circle" theme="filled"/>立即开通</a-button>
           </div>
         </div>
         <div class="card-container" v-else-if="!isVip&&isBuying">

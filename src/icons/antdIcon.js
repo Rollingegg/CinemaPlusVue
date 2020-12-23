@@ -20,6 +20,9 @@ export {
 export {
   default as RightCircleOutline
 } from '@ant-design/icons/lib/outline/RightCircleOutline'
+export {
+  default as PlusCircleFill
+} from '@ant-design/icons/lib/fill/PlusCircleFill'
 
 // export what antd other components need
 export {
