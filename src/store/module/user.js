@@ -60,8 +60,8 @@ const user = {
       state.avatar = defaultAvatarUrl
       state.coupons = []
       state.consumptionHistory = {}
-      state.vipCardInfoList = []
       state.memberCardInfo = {}
+      state.isVip = false
     }
   },
   actions: {
@@ -79,6 +79,7 @@ const user = {
     async logout ({ commit, state, dispatch }) {
       db.clear()
       commit('resetUserInfo')
+      db.save('VIP_CARD_INFO', state.vipCardInfoList)
       await logout()
     },
     async buyVipCard ({ commit, state, dispatch }, cardType) {

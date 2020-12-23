@@ -348,6 +348,7 @@ export default {
       }
       &-right{
         padding: 10px 0 0 @base-interval;
+        border-left: 1px dashed @primary-color;
         flex-grow: 1;
         display: flex;
         flex-direction: column;

@@ -1,6 +1,6 @@
 <template>
   <a-spin class="home" :spinning="loading" size="large">
-    <div class="banner" role="banner" v-if="!isVip">
+    <div class="banner" role="banner" v-show="!isVip">
       <a-carousel :autoplay="true" arrows>
         <div
           slot="prevArrow"
