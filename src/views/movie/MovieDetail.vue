@@ -123,7 +123,7 @@ export default {
   },
   async mounted () {
     this.loading = true
-    this.movieInfo = await fetchMovieDetail(this.userId, this.id)
+    this.movieInfo = await fetchMovieDetail(this.userId || 0, this.id)
     this.isLike = this.movieInfo.islike !== 0
     this.loading = false
     this.scheduleData = await fetchScheduleDataByMovieId(this.id)
@@ -131,16 +131,21 @@ export default {
   },
   methods: {
     buyMovie (scheduleId) {
-      this.$router.push({
-        name: 'movieBuy',
-        query: {
-          id: this.id,
-          scheduleId: scheduleId
-        },
-        params: {
-          title: this.movieInfo.name || ''
-        }
-      })
+      if (this.userId) {
+        this.$router.push({
+          name: 'movieBuy',
+          query: {
+            id: this.id,
+            scheduleId: scheduleId
+          },
+          params: {
+            title: this.movieInfo.name || ''
+          }
+        })
+      } else {
+        this.$message.warning('请先登录')
+        this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+      }
     },
     renderPlayTime (time) {
       return this.$options.filters.dateformat(time, '预计HH:mm散场')
