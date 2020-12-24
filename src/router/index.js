@@ -54,7 +54,7 @@ const routes = [
         props: (route) => ({
           query: route.query.q,
           limit: route.query.limit,
-          type: route.query.type
+          type: Number(route.query.type)
         })
       },
       {

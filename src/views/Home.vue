@@ -22,7 +22,7 @@
         <section class="movies-overview-container">
           <div class="movies-overview-container-title">
             <div class="section-title">正在热映</div>
-            <router-link to="/movies?type=1" class="section-link">查看全部
+            <router-link to="/movies?type=0" class="section-link">查看全部
               <a-icon type="right"/>
             </router-link>
           </div>
@@ -68,7 +68,7 @@
           <div class="movies-overview-container-title">
             <div class="section-title">最受欢迎</div>
           </div>
-          <router-link :to="`/movies/${rankList[0].movieId}`" slot="header" class="rank-first">
+          <router-link v-if="!loading" :to="`/movies/${rankList[0].movieId}`" slot="header" class="rank-first">
             <i class="rank-first-icon rank-first-icon-hottest"></i>
             <img :src="rankList[0].posterUrl" alt="movie-poster" class="rank-first-movie"/>
             <div class="rank-first-info">
@@ -124,7 +124,8 @@ export default {
       fetchMovieRank({
         limit: 5
       })])
-    this.moviesCurrent = moviesCurrent.slice(0, 8)
+    // 热映中的电影取倒数8个
+    this.moviesCurrent = moviesCurrent.slice(-8)
     this.rankList = rankList.slice(0, 5)
     const likes = [313, 287, 165, 156, 99]
     for (let i = 0; i < this.rankList.length; i++) {

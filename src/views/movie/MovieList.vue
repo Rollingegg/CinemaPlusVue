@@ -78,6 +78,9 @@ export default {
       this.loading = true
       try {
         this.movieList = await fetchMovies(query)
+        if (this.type === 0) {
+          this.movieList.reverse()
+        }
         if (this.movieList === null || this.movieList.length === 0) {
           this.$message.error('获取电影列表失败，请检查网络连接')
         }

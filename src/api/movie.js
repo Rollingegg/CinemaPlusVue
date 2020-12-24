@@ -11,10 +11,8 @@ export function fetchMovies (param) {
       keyword: param.query
     })
   }
-  if (param.type) {
-    if (param.type === 0) {
-      return request.get('/movie/all/exclude/off')
-    }
+  if (param.type === 0) {
+    return request.get('/movie/all/exclude/off')
   }
   return request.get('/movie/all')
 }

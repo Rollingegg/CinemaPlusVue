@@ -19,7 +19,7 @@
         </div>
       </div>
       <div class="movie-card-info-description" v-if="!isMobile">
-        {{ movieInfo.description }}
+        {{ movieInfo.description | trim }}
       </div>
       <div class="movie-card-info-item">时长：<span>{{ movieInfo.length }}分钟</span></div>
       <div class="movie-card-info-item" v-if="!isMobile">导演：<span>{{ movieInfo.director }}</span></div>
@@ -54,6 +54,11 @@ export default {
   },
   props: {
     movieInfo: Object
+  },
+  filters: {
+    trim (str) {
+      return String(str).trim()
+    }
   },
   methods: {
     jump2movie () {
