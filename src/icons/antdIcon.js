@@ -23,6 +23,18 @@ export {
 export {
   default as PlusCircleFill
 } from '@ant-design/icons/lib/fill/PlusCircleFill'
+export {
+  default as UserOutline
+} from '@ant-design/icons/lib/outline/UserOutline'
+export {
+  default as LockOutline
+} from '@ant-design/icons/lib/outline/LockOutline'
+export {
+  default as MobileOutline
+} from '@ant-design/icons/lib/outline/MobileOutline'
+export {
+  default as MailOutline
+} from '@ant-design/icons/lib/outline/MailOutline'
 
 // export what antd other components need
 export {

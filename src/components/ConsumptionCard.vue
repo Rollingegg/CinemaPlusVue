@@ -15,12 +15,12 @@
       </div>
     </div>
     <div class="consumption-afford-box">
-      <div class="consumption-price" style="color: #222222">支付日期：<span>{{ consumptionInfo.time | dateFormat }}</span>
+      <div class="consumption-price">支付日期：<span>{{ consumptionInfo.time | dateFormat }}</span>
       </div>
       <div class="consumption-price-box">
-        <div class="consumption-price" style="color: #666666">总价：<span>{{ consumptionInfo.total.toFixed(2) }}</span>
+        <div class="consumption-price">总价：<span>{{ consumptionInfo.total.toFixed(2) }}</span>
         </div>
-        <div class="consumption-price" style="color: #222222">实付：<span>{{ consumptionInfo.pay.toFixed(2) }}</span></div>
+        <div class="consumption-price">实付：<span>{{ consumptionInfo.pay.toFixed(2) }}</span></div>
       </div>
     </div>
   </div>
@@ -82,6 +82,7 @@ export default {
     justify-content: space-between;
     padding-left: @base-interval;
     margin-right: 50px;
+    flex-basis: 30%;
     @media (max-width: @mobile-screen-width) {
       margin-right: 0;
       padding-left: 8px;
@@ -90,34 +91,25 @@ export default {
 }
 
 .consumption-title {
-  //font-size: 16px;
   margin-bottom: 8px;
   @media (max-width: @mobile-screen-width) {
     margin-bottom: 4px;
   }
-  //color: #222222;
 }
 
 .consumption-info {
   font-size: 12px;
   margin-bottom: 0;
-  //color: #666666;
 }
 
 .consumption-afford-box {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-}
-
-.consumption-price {
-  font-size: 14px;
-  margin: 0 10px 0 0;
-  //width: 300px;
+  padding-left: 10px;
 }
 
 .consumption-price-box {
   display: flex;
-  align-items: flex-end;
+  justify-content: space-between;
 }
 </style>

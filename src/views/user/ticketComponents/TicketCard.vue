@@ -1,6 +1,9 @@
 <template>
   <div :id="idProp.concat(this.ticket.id)">
-    <div class="ticket-card" :class="ifNoUseTicketClass">
+    <div class="ticket-card" :class="{noUseTicketClass: overDate}">
+      <div v-if="overDate" class="banner-container">
+        <div class="outdated-banner">已失效</div>
+      </div>
       <div class="ticket-card-poster-wrapper">
         <img v-lazy="ticket.movie.posterUrl" :alt="ticket.movie.name"/>
       </div>
@@ -54,7 +57,7 @@
                 {{ ticket.time }}
               </a-descriptions-item>
               <a-descriptions-item label="状态">
-                {{ this.ifNoUseTicketClass.noUseTicketClass ? '已失效' : '有 效' }}
+                {{ overDate ? '已失效' : '有 效' }}
               </a-descriptions-item>
               <a-descriptions-item label="座位">
                 <span v-html="this.replaceStr(ticket.seatsStr)"/>
@@ -132,9 +135,9 @@ export default {
     }
   },
   mounted () {
-    if (this.ifNoUseTicketClass.noUseTicketClass) {
-      setWaterMark('已失效', '无效票', this.idProp + this.ticket.id, this.isMobile)
-    }
+    // if (this.ifNoUseTicketClass.noUseTicketClass) {
+    //   setWaterMark('已失效', '无效票', this.idProp + this.ticket.id, this.isMobile)
+    // }
   },
   methods: {
     replaceStr (seats) {
@@ -143,18 +146,16 @@ export default {
   },
   destroyed () {
     window.onresize = null
-    if (this.ifNoUseTicketClass.noUseTicketClass) {
-      removeWatermark(this.idProp + this.ticket.id)
-    }
+    // if (this.ifNoUseTicketClass.noUseTicketClass) {
+    //   removeWatermark(this.idProp + this.ticket.id)
+    // }
   },
   computed: {
     isMobile () {
       return this.$store.state.device === 'mobile'
     },
-    ifNoUseTicketClass () {
-      return {
-        noUseTicketClass: this.ticket.state === '已失效' || new Date(this.ticket.schedule.endTime) < Date.now()
-      }
+    overDate () {
+      return this.ticket.state === '已失效' || new Date(this.ticket.schedule.endTime) < Date.now()
     }
   }
 }
@@ -165,7 +166,25 @@ export default {
 @import "~@/assets/style/utils";
 
 .noUseTicketClass {
-  -webkit-filter: blur(0.75px) grayscale(.25) opacity(80%);
+  -webkit-filter: grayscale(.25) opacity(80%);
+}
+.banner-container {
+  overflow: hidden;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 160px;
+  height: 160px;
+  .outdated-banner {
+    background-color: gray;
+    color: white;
+    width: 100%;
+    text-align: center;
+    margin-left: 30%;
+    margin-top: 10%;
+    position: absolute;
+    transform: rotate(45deg);
+  }
 }
 
 .ticket-card {

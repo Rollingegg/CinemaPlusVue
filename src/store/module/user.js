@@ -8,7 +8,7 @@ import {
   login,
   logout
 } from '@/api/user'
-const loginAvatarUrl = 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif?imageView2/1/w/48/h/48'
+const loginAvatarUrl = 'https://s3.ax1x.com/2020/12/28/rIjtz9.jpg'
 const defaultAvatarUrl = 'https://p0.meituan.net/movie/7dd82a16316ab32c8359debdb04396ef2897.png'
 const user = {
   namespaced: true,
