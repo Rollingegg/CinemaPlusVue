@@ -17,6 +17,7 @@ BuildFiles:
      - files.tar.gz
      - dist/
   cache:
+    key: node_modules
     paths:
     - node_modules/
 
